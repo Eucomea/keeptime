@@ -28,6 +28,50 @@ requestAnimationFrame(() => {
   document.documentElement.classList.add("is-ready");
 });
 
+const THEME_KEY = "kt-theme";
+const themeToggle = document.getElementById("theme-toggle");
+const themeColorMeta = document.getElementById("theme-color");
+const logoSource = document.getElementById("logo-source");
+const logoImg = document.getElementById("logo-img");
+const worldLogoSource = document.getElementById("world-logo-source");
+const worldLogoImg = document.getElementById("world-logo-img");
+
+function currentTheme() {
+  return document.documentElement.dataset.theme === "dark" ? "dark" : "light";
+}
+
+function applyLogoTheme(theme) {
+  const dark = theme === "dark";
+  if (logoSource) logoSource.srcset = dark ? "/logo-dark.webp" : "/logo.webp";
+  if (logoImg) logoImg.src = dark ? "/logo-dark.png" : "/logo.jpg";
+  if (worldLogoSource) worldLogoSource.srcset = dark ? "/logo-dark.webp" : "/logo.webp";
+  if (worldLogoImg) worldLogoImg.src = dark ? "/logo-dark.png" : "/logo.jpg";
+}
+
+function applyTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  themeColorMeta?.setAttribute("content", theme === "dark" ? "#0A0A0A" : "#F7E7E8");
+  applyLogoTheme(theme);
+  if (themeToggle) {
+    themeToggle.setAttribute(
+      "aria-label",
+      theme === "dark" ? "Switch to light theme" : "Switch to dark theme",
+    );
+  }
+}
+
+applyTheme(currentTheme());
+
+themeToggle?.addEventListener("click", () => {
+  const next = currentTheme() === "dark" ? "light" : "dark";
+  try {
+    localStorage.setItem(THEME_KEY, next);
+  } catch {
+    /* private mode */
+  }
+  applyTheme(next);
+});
+
 function pad(n) {
   return String(n).padStart(2, "0");
 }
@@ -55,10 +99,11 @@ function renderClock(now) {
 
 const tilt = { x: 0, y: 0, tx: 0, ty: 0, ease: 0.14 };
 const seat = { cx: 0, cy: 0, r: 1 };
-const pointer = { x: 0, y: 0, active: false };
+const pointer = { x: 0, y: 0, active: false, dragging: false };
 const motion = {
   enabled: false,
   pending: false,
+  live: false,
   calibrated: false,
   beta0: 0,
   gamma0: 0,
@@ -79,15 +124,29 @@ function measureSeat() {
 
 function resetTilt() {
   pointer.active = false;
+  pointer.dragging = false;
+  if (coarsePointer) return;
   tilt.tx = 0;
   tilt.ty = 0;
   tilt.ease = 0.1;
   orbit?.classList.remove("is-tilting");
 }
 
+function applyIdleTilt() {
+  const t = performance.now() / 1000;
+  tilt.tx = Math.sin(t * 0.52) * 16 + Math.sin(t * 0.19) * 6;
+  tilt.ty = Math.cos(t * 0.41) * 12 + Math.cos(t * 0.23) * 5;
+  tilt.ease = 0.08;
+  orbit?.classList.add("is-tilting");
+}
+
 function updateTiltTarget() {
-  if (motion.enabled && coarsePointer) return;
+  if (motion.live) return;
   if (!pointer.active) {
+    if (coarsePointer) {
+      applyIdleTilt();
+      return;
+    }
     tilt.tx = 0;
     tilt.ty = 0;
     tilt.ease = 0.1;
@@ -111,7 +170,8 @@ function updateTiltTarget() {
 }
 
 function onPointer(event) {
-  if (reduced || !orbit || !stage || (motion.enabled && coarsePointer)) return;
+  if (reduced || !orbit || !stage || motion.live) return;
+  if (coarsePointer && !pointer.dragging) return;
   pointer.x = event.clientX;
   pointer.y = event.clientY;
   pointer.active = true;
@@ -136,6 +196,7 @@ function onOrientation(event) {
   tilt.ty = clamp(-dBeta * 1.4, -40, 40);
   tilt.ease = 0.12;
   pointer.active = false;
+  motion.live = true;
   orbit.classList.add("is-tilting");
 }
 
@@ -213,7 +274,12 @@ function frame() {
     tilt.x += (tilt.tx - tilt.x) * tilt.ease;
     tilt.y += (tilt.ty - tilt.y) * tilt.ease;
     orbit.style.transform = `rotateX(${tilt.y}deg) rotateY(${tilt.x}deg)`;
-    if (!pointer.active && Math.hypot(tilt.x, tilt.y) < 0.15) {
+    if (
+      !coarsePointer &&
+      !pointer.active &&
+      !motion.live &&
+      Math.hypot(tilt.x, tilt.y) < 0.15
+    ) {
       orbit.classList.remove("is-tilting");
     }
   }
@@ -476,6 +542,10 @@ orbit.addEventListener("pointerdown", (event) => {
   requestMotionAccess();
   orbit.setPointerCapture(event.pointerId);
   press = { id: event.pointerId, x: event.clientX, y: event.clientY };
+  if (coarsePointer) {
+    pointer.dragging = true;
+    onPointer(event);
+  }
 });
 
 orbit.addEventListener("pointerup", (event) => {
@@ -485,6 +555,8 @@ orbit.addEventListener("pointerup", (event) => {
     orbit.releasePointerCapture(event.pointerId);
   }
   press = null;
+  pointer.dragging = false;
+  pointer.active = false;
   if (moved > 12) return;
   requestMotionAccess();
   playEmbed();
@@ -492,6 +564,8 @@ orbit.addEventListener("pointerup", (event) => {
 
 orbit.addEventListener("pointercancel", () => {
   press = null;
+  pointer.dragging = false;
+  pointer.active = false;
 });
 
 skipPrev.addEventListener("click", (event) => {

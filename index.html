@@ -9,7 +9,9 @@
       content="KEEP TIME — official. Pop, electronic, road notes."
     />
     <link rel="canonical" href="https://thisiskeeptime.com/" />
-    <meta name="theme-color" content="#F7E7E8" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="supported-color-schemes" content="light dark" />
+    <meta name="theme-color" content="#F7E7E8" id="theme-color" />
     <meta property="og:title" content="KEEP TIME" />
     <meta property="og:description" content="The songs aren't new. I am." />
     <meta property="og:type" content="website" />
@@ -32,6 +34,36 @@
       if ("scrollRestoration" in history) {
         history.scrollRestoration = "manual";
       }
+
+      const storedTheme = (() => {
+        try {
+          return localStorage.getItem("kt-theme");
+        } catch {
+          return null;
+        }
+      })();
+      const theme =
+        storedTheme === "light" || storedTheme === "dark"
+          ? storedTheme
+          : window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light";
+      document.documentElement.dataset.theme = theme;
+      const themeColor = document.getElementById("theme-color");
+      if (themeColor) {
+        themeColor.setAttribute("content", theme === "dark" ? "#0A0A0A" : "#F7E7E8");
+      }
+      document.addEventListener("DOMContentLoaded", () => {
+        if (theme !== "dark") return;
+        const logoSource = document.getElementById("logo-source");
+        const logoImg = document.getElementById("logo-img");
+        const worldLogoSource = document.getElementById("world-logo-source");
+        const worldLogoImg = document.getElementById("world-logo-img");
+        if (logoSource) logoSource.srcset = "/logo-dark.webp";
+        if (logoImg) logoImg.src = "/logo-dark.png";
+        if (worldLogoSource) worldLogoSource.srcset = "/logo-dark.webp";
+        if (worldLogoImg) worldLogoImg.src = "/logo-dark.png";
+      });
 
       const initialSection =
         new URLSearchParams(location.search).get("s") ||
@@ -104,7 +136,18 @@
         <a href="#listen">Listen</a>
         <a href="#connect">Connect</a>
       </nav>
-      <time class="nav-clock" id="nav-clock" datetime="">00:00:00</time>
+      <div class="nav-end">
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to dark theme">
+          <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15.2 3.1a8.6 8.6 0 1 0 5.7 15.2A9.2 9.2 0 0 1 15.2 3.1z" />
+          </svg>
+          <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="3.6" />
+            <path d="M12 2.8v2.2M12 19v2.2M4.1 4.1l1.6 1.6M18.3 18.3l1.6 1.6M2.8 12h2.2M19 12h2.2M4.1 19.9l1.6-1.6M18.3 5.7l1.6-1.6" />
+          </svg>
+        </button>
+        <time class="nav-clock" id="nav-clock" datetime="">00:00:00</time>
+      </div>
     </header>
 
     <main id="top">
@@ -146,8 +189,8 @@
                   </svg>
                   <div class="orbit-core">
                     <picture>
-                      <source srcset="/logo.webp" type="image/webp" />
-                      <img class="logo" src="/logo.jpg" alt="KEEP TIME" width="264" height="264" />
+                      <source id="logo-source" srcset="/logo.webp" type="image/webp" />
+                      <img class="logo" id="logo-img" src="/logo.jpg" alt="KEEP TIME" width="264" height="264" />
                     </picture>
                   </div>
                 </div>
@@ -195,8 +238,8 @@
           </div>
           <figure class="world-visual" id="world-visual">
             <picture>
-              <source srcset="/logo.webp" type="image/webp" />
-              <img src="/logo.jpg" alt="KEEP TIME brush mark" width="640" height="640" loading="lazy" />
+              <source id="world-logo-source" srcset="/logo.webp" type="image/webp" />
+              <img id="world-logo-img" src="/logo.jpg" alt="KEEP TIME brush mark" width="640" height="640" loading="lazy" />
             </picture>
           </figure>
         </div>

@@ -8,12 +8,14 @@
 @import "@fontsource/ibm-plex-mono/latin-500.css";
 
 :root {
+  color-scheme: light dark;
   --rose: #f7e7e8;
   --rose-deep: #efd4d7;
   --creme: #fff7f2;
   --gold: #c3924a;
   --gold-soft: #d4b07a;
   --ink: #1b1714;
+  --ink-hover: #0f0d0b;
   --ink-60: rgba(27, 23, 20, 0.62);
   --ink-40: rgba(27, 23, 20, 0.4);
   --ink-18: rgba(27, 23, 20, 0.18);
@@ -22,6 +24,12 @@
   --pink: #faa1b5;
   --pink-deep: #e87896;
   --glass: color-mix(in srgb, var(--rose) 72%, white);
+  --disc: #f7e7e8;
+  --disc-ink: #1b1714;
+  --disc-ink-60: rgba(27, 23, 20, 0.62);
+  --disc-ink-18: rgba(27, 23, 20, 0.18);
+  --disc-ink-10: rgba(27, 23, 20, 0.1);
+  --disc-groove: rgba(27, 23, 20, 0.03);
   --sans: "Plus Jakarta Sans", system-ui, sans-serif;
   --serif: "Newsreader", "Times New Roman", serif;
   --mono: "IBM Plex Mono", ui-monospace, monospace;
@@ -36,6 +44,7 @@
 }
 
 html {
+  color-scheme: light dark;
   scroll-behavior: smooth;
   background: var(--rose);
 }
@@ -187,8 +196,6 @@ button {
 }
 
 .nav-clock {
-  grid-column: 3;
-  justify-self: end;
   font-family: var(--mono);
   font-size: 12px;
   font-variant-numeric: tabular-nums;
@@ -196,6 +203,51 @@ button {
   color: var(--ink-60);
   min-width: 7.2ch;
   text-align: right;
+}
+
+.nav-end {
+  grid-column: 3;
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.theme-toggle {
+  appearance: none;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink-60);
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  color: var(--ink);
+}
+
+.theme-icon {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.theme-icon-moon {
+  fill: currentColor;
+  stroke: none;
+}
+
+html[data-theme="dark"] .theme-icon-moon,
+html:not([data-theme="dark"]) .theme-icon-sun {
+  display: none;
 }
 
 .hero {
@@ -367,9 +419,9 @@ html.js.is-ready .hero-copy {
     repeating-radial-gradient(
       circle at 50% 50%,
       transparent 0 6px,
-      rgba(27, 23, 20, 0.03) 7px
+      var(--disc-groove) 7px
     ),
-    var(--rose);
+    var(--disc);
   contain: paint;
   transform-style: flat;
   transform-origin: 50% 50%;
@@ -401,12 +453,12 @@ html.js.is-ready .hero-copy {
 .ring {
   position: absolute;
   border-radius: 50%;
-  border: 1px solid var(--ink-10);
+  border: 1px solid var(--disc-ink-10);
 }
 
 .ring-outer {
   inset: 0;
-  border-color: var(--ink-18);
+  border-color: var(--disc-ink-18);
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--gold) 18%, transparent);
 }
 
@@ -419,7 +471,7 @@ html.js.is-ready .hero-copy {
 
 .ring-inner {
   inset: 20%;
-  border-color: var(--ink-10);
+  border-color: var(--disc-ink-10);
 }
 
 .ticks {
@@ -444,12 +496,12 @@ html.js.is-ready .hero-copy {
   left: 0;
   width: 1px;
   height: 10px;
-  background: var(--ink-18);
+  background: var(--disc-ink-18);
 }
 
 .tick.hour::after {
   height: 16px;
-  background: color-mix(in srgb, var(--gold) 70%, var(--ink));
+  background: color-mix(in srgb, var(--gold) 70%, var(--disc-ink));
 }
 
 .wave {
@@ -519,7 +571,7 @@ html.js.is-ready .hero-copy {
 }
 
 .track-ring-bg {
-  stroke: var(--ink-10);
+  stroke: var(--disc-ink-10);
 }
 
 .track-ring-fg {
@@ -545,7 +597,7 @@ html.js.is-ready .hero-copy {
 }
 
 .track-title text {
-  fill: var(--ink-60);
+  fill: var(--disc-ink-60);
   font-family: var(--mono);
   font-size: 3.1px;
   letter-spacing: 0.18em;
@@ -567,14 +619,14 @@ html.js.is-ready .hero-copy {
   width: 2.5px;
   height: 24%;
   margin-left: -1.25px;
-  background: var(--ink);
+  background: var(--disc-ink);
 }
 
 .hand-minute {
   width: 1.5px;
   height: 33%;
   margin-left: -0.75px;
-  background: var(--ink-60);
+  background: var(--disc-ink-60);
 }
 
 .hand-second {
@@ -596,10 +648,10 @@ html.js.is-ready .hero-copy {
     repeating-radial-gradient(
       circle at 50% 50%,
       transparent 0 7px,
-      rgba(27, 23, 20, 0.035) 8px
+      var(--disc-groove) 8px
     ),
-    var(--rose);
-  box-shadow: inset 0 0 0 1px var(--ink-10);
+    var(--disc);
+  box-shadow: inset 0 0 0 1px var(--disc-ink-10);
 }
 
 .logo {
@@ -613,6 +665,10 @@ html.js.is-ready .hero-copy {
 .orbit-core .logo {
   object-position: 62% 52%;
   transform: translate(7%, 1%);
+}
+
+html[data-theme="dark"] .world-visual {
+  background: #0a0a0a;
 }
 
 .hero-copy {
@@ -671,7 +727,7 @@ html.js.is-ready .hero-copy {
 }
 
 .btn-ink:hover {
-  background: #0f0d0b;
+  background: var(--ink-hover);
 }
 
 .btn-ghost {
@@ -1138,6 +1194,15 @@ html.js .panel.reveal {
     min-width: 6.8ch;
   }
 
+  .nav-end {
+    gap: 6px;
+  }
+
+  .theme-toggle {
+    width: 24px;
+    height: 24px;
+  }
+
   .hero,
   .panel,
   .foot {
@@ -1208,4 +1273,43 @@ html.js .panel.reveal {
     background: var(--rose);
     backdrop-filter: none;
   }
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --rose: #0a0a0a;
+  --rose-deep: #161616;
+  --creme: #121212;
+  --gold: #d4a45c;
+  --gold-soft: #c9ab78;
+  --ink: #f6d4db;
+  --ink-hover: #fbe3e7;
+  --ink-60: rgba(246, 212, 219, 0.72);
+  --ink-40: rgba(246, 212, 219, 0.5);
+  --ink-18: rgba(246, 212, 219, 0.24);
+  --ink-10: rgba(246, 212, 219, 0.14);
+  --ink-06: rgba(246, 212, 219, 0.08);
+  --glass: color-mix(in srgb, var(--rose) 70%, black);
+  --disc: #0a0a0a;
+  --disc-ink: #f6d4db;
+  --disc-ink-60: rgba(246, 212, 219, 0.72);
+  --disc-ink-18: rgba(246, 212, 219, 0.26);
+  --disc-ink-10: rgba(246, 212, 219, 0.14);
+  --disc-groove: rgba(246, 212, 219, 0.06);
+}
+
+html[data-theme="dark"],
+html[data-theme="dark"] body {
+  color-scheme: dark;
+  background: var(--rose);
+  color: var(--ink);
+}
+
+html[data-theme="dark"] .wash {
+  display: none;
+}
+
+html[data-theme="dark"] .grain {
+  opacity: 0.12;
+  mix-blend-mode: overlay;
 }
