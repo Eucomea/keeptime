@@ -51,7 +51,6 @@ function renderClock(now) {
 const tilt = { x: 0, y: 0, tx: 0, ty: 0, ease: 0.14 };
 const seat = { cx: 0, cy: 0, r: 1 };
 const pointer = { x: 0, y: 0, active: false };
-const scrollLock = { active: false, x: 0, y: 0, releaseTimer: 0 };
 
 function measureSeat() {
   const el = orbitScene || orbit;
@@ -114,13 +113,6 @@ window.addEventListener("scroll", measureSeat, true);
 
 function frame() {
   renderClock(new Date());
-
-  if (
-    scrollLock.active &&
-    (window.scrollX !== scrollLock.x || window.scrollY !== scrollLock.y)
-  ) {
-    window.scrollTo(scrollLock.x, scrollLock.y);
-  }
 
   const elapsed = player.playing ? performance.now() - player.stamp : 0;
   const pos = Math.min(player.position + elapsed, player.duration);
@@ -231,10 +223,6 @@ let spotifyLoading = false;
 
 function loadSpotifyApi() {
   if (player.controller || spotifyLoading) return;
-  if (document.querySelector('script[src*="spotify.com/embed/iframe-api"]')) {
-    spotifyLoading = true;
-    return;
-  }
   spotifyLoading = true;
   const spotifyApi = document.createElement("script");
   spotifyApi.src = "https://open.spotify.com/embed/iframe-api/v1";
@@ -320,7 +308,6 @@ function applyPlayback(data) {
   if (player.wanted && uri === player.wanted && player.playing) {
     if (player.pendingPlay) {
       player.pendingPlay = false;
-      releaseScroll();
     }
     if (player.position < player.duration - 1000) player.advancing = false;
   }
@@ -331,34 +318,12 @@ function applyPlayback(data) {
   skip(1);
 }
 
-function lockScroll() {
-  window.clearTimeout(scrollLock.releaseTimer);
-  scrollLock.x = window.scrollX;
-  scrollLock.y = window.scrollY;
-  scrollLock.active = true;
-  scrollLock.releaseTimer = window.setTimeout(() => {
-    window.scrollTo(scrollLock.x, scrollLock.y);
-    scrollLock.active = false;
-    measureSeat();
-  }, 6000);
-}
-
-function releaseScroll() {
-  window.clearTimeout(scrollLock.releaseTimer);
-  scrollLock.releaseTimer = window.setTimeout(() => {
-    window.scrollTo(scrollLock.x, scrollLock.y);
-    scrollLock.active = false;
-    measureSeat();
-  }, 800);
-}
-
 function skip(step) {
   loadSpotifyApi();
   if (!player.controller || !player.queue.length) {
     player.queued = true;
     return;
   }
-  lockScroll();
   player.index = (player.index + step + player.queue.length) % player.queue.length;
   const uri = player.queue[player.index];
   player.wanted = uri;
@@ -492,7 +457,7 @@ if (reduced) {
   revealPanels.forEach((panel) => panel.classList.add("is-in"));
 }
 
-/* Lazy-load Spotify when listen section nears viewport */
+/* Load Spotify shortly before its visible section enters the viewport. */
 const listenSection = document.getElementById("listen");
 if (listenSection && "IntersectionObserver" in window) {
   const listenIo = new IntersectionObserver(

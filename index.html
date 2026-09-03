@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>KEEP TIME</title>
     <meta
       name="description"
@@ -25,6 +25,7 @@
     <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
+    <link rel="preconnect" href="https://open.spotify.com" crossorigin />
     <link rel="stylesheet" href="/src/style.css" />
     <script>
       document.documentElement.classList.add("js");
@@ -81,30 +82,32 @@
           <div class="orbit-scene" id="orbit-scene">
             <div class="orbit" id="orbit" role="button" tabindex="0" aria-label="Play or pause">
               <div class="orbit-face">
-                <div class="ring ring-outer" aria-hidden="true"></div>
-                <div class="ring ring-mid" aria-hidden="true"></div>
-                <div class="ring ring-inner" aria-hidden="true"></div>
-                <div class="ticks" id="ticks" aria-hidden="true"></div>
-                <div class="wave" id="wave" aria-hidden="true"></div>
-                <svg class="track-ring" viewBox="0 0 100 100" aria-hidden="true">
-                  <circle class="track-ring-bg" cx="50" cy="50" r="48.4" />
-                  <circle class="track-ring-fg" id="track-progress" cx="50" cy="50" r="48.4" />
-                </svg>
-                <svg class="track-title" viewBox="0 0 100 100" aria-hidden="true">
-                  <text>
-                    <textPath
-                      id="title-text"
-                      path="M50,50 m-43.5,0 a43.5,43.5 0 1,1 87,0 a43.5,43.5 0 1,1 -87,0"
-                    >
-                      KEEP TIME ·
-                    </textPath>
-                  </text>
-                </svg>
-                <div class="orbit-core">
-                  <picture>
-                    <source srcset="/logo.webp" type="image/webp" />
-                    <img class="logo" src="/logo.jpg" alt="KEEP TIME" width="264" height="264" />
-                  </picture>
+                <div class="disc-spin">
+                  <div class="ring ring-outer" aria-hidden="true"></div>
+                  <div class="ring ring-mid" aria-hidden="true"></div>
+                  <div class="ring ring-inner" aria-hidden="true"></div>
+                  <div class="ticks" id="ticks" aria-hidden="true"></div>
+                  <div class="wave" id="wave" aria-hidden="true"></div>
+                  <svg class="track-ring" viewBox="0 0 100 100" aria-hidden="true">
+                    <circle class="track-ring-bg" cx="50" cy="50" r="48.4" />
+                    <circle class="track-ring-fg" id="track-progress" cx="50" cy="50" r="48.4" />
+                  </svg>
+                  <svg class="track-title" viewBox="0 0 100 100" aria-hidden="true">
+                    <text>
+                      <textPath
+                        id="title-text"
+                        path="M50,50 m-43.5,0 a43.5,43.5 0 1,1 87,0 a43.5,43.5 0 1,1 -87,0"
+                      >
+                        KEEP TIME ·
+                      </textPath>
+                    </text>
+                  </svg>
+                  <div class="orbit-core">
+                    <picture>
+                      <source srcset="/logo.webp" type="image/webp" />
+                      <img class="logo" src="/logo.jpg" alt="KEEP TIME" width="264" height="264" />
+                    </picture>
+                  </div>
                 </div>
                 <div class="hand hand-hour" id="hand-hour" aria-hidden="true"></div>
                 <div class="hand hand-minute" id="hand-minute" aria-hidden="true"></div>
