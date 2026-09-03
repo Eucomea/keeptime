@@ -121,6 +121,15 @@ function frame() {
   timeNow.textContent = formatPlay(pos);
   timeEnd.textContent = formatPlay(player.duration);
 
+  if (
+    player.playing &&
+    !player.advancing &&
+    player.duration > 2000 &&
+    pos >= player.duration - 80
+  ) {
+    skip(1);
+  }
+
   if (player.playing && !reduced) {
     const t = pos / 1000;
     waveBars.forEach((bar, i) => {
@@ -207,7 +216,6 @@ const TRACKS = [
 const player = {
   controller: null,
   queued: false,
-  pendingPlay: false,
   playing: false,
   position: 0,
   duration: 1,
@@ -217,6 +225,8 @@ const player = {
   queue: TRACKS.map((track) => track.uri),
   index: 0,
   advancing: false,
+  pauseRequested: false,
+  visualUntil: 0,
 };
 
 let spotifyLoading = false;
@@ -250,11 +260,17 @@ function hashWave(i, t) {
 }
 
 const titleRing = titleText.closest(".track-title");
+const progressRing = trackProgress.closest(".track-ring");
 let titleFade = 0;
 
 function setTitle(label) {
   const loop = `${label}  ·  `.repeat(6);
   if (titleText.textContent === loop) return;
+  if (titleRing.classList.contains("is-fading")) {
+    titleText.textContent = loop;
+    requestAnimationFrame(() => titleRing.classList.remove("is-fading"));
+    return;
+  }
   if (!orbit.classList.contains("is-playing") || !titleText.textContent.trim()) {
     titleText.textContent = loop;
     return;
@@ -294,10 +310,19 @@ function applyPlayback(data) {
   if (player.wanted && uri && uri !== player.wanted) return;
 
   player.playing = !data.isPaused && !data.isBuffering;
+  if (player.playing) player.pauseRequested = false;
   player.position = Number(data.position) || 0;
   player.duration = Math.max(Number(data.duration) || 1, 1);
   player.stamp = performance.now();
-  orbit.classList.toggle("is-playing", player.playing || player.advancing);
+  const keepTransition =
+    !player.pauseRequested && performance.now() < player.visualUntil;
+  const isActive =
+    player.playing ||
+    player.advancing ||
+    (!player.pauseRequested && data.isBuffering) ||
+    keepTransition;
+  orbit.classList.toggle("is-playing", isActive);
+  stage.classList.toggle("is-playing", isActive);
 
   if (uri && uri !== player.uri) {
     player.uri = uri;
@@ -306,9 +331,6 @@ function applyPlayback(data) {
   }
 
   if (player.wanted && uri === player.wanted && player.playing) {
-    if (player.pendingPlay) {
-      player.pendingPlay = false;
-    }
     if (player.position < player.duration - 1000) player.advancing = false;
   }
 
@@ -328,25 +350,46 @@ function skip(step) {
   const uri = player.queue[player.index];
   player.wanted = uri;
   player.uri = uri;
+  player.playing = false;
   player.position = 0;
   player.duration = 1;
   player.advancing = true;
-  player.pendingPlay = true;
+  player.pauseRequested = false;
+  player.visualUntil = performance.now() + 2000;
   player.stamp = performance.now();
-  resolveTitle(uri);
+  titleRing.classList.add("is-fading");
+  progressRing.classList.add("is-resetting");
   orbit.classList.add("is-playing");
+  stage.classList.add("is-playing");
+  let loading;
   if (typeof player.controller.loadEntity === "function") {
-    player.controller.loadEntity(uri);
+    loading = player.controller.loadEntity(uri);
   } else {
-    player.controller.loadUri(uri);
+    loading = player.controller.loadUri(uri);
   }
-  player.controller.play();
+  const playLoaded = () => {
+    if (player.wanted !== uri || player.playing) return;
+    player.controller.play();
+  };
+  if (loading && typeof loading.then === "function") {
+    loading.then(playLoaded, playLoaded);
+  } else {
+    window.setTimeout(playLoaded, 120);
+  }
 }
 
 function playEmbed() {
   stage.classList.add("is-live");
   loadSpotifyApi();
   if (player.controller) {
+    if (player.playing) {
+      player.pauseRequested = true;
+    } else {
+      player.pauseRequested = false;
+      player.visualUntil = performance.now() + 2000;
+      orbit.classList.add("is-playing");
+      stage.classList.add("is-playing");
+    }
     player.controller.togglePlay();
     return;
   }
@@ -409,12 +452,11 @@ window.onSpotifyIframeApiReady = (IFrameAPI) => {
     },
     (controller) => {
       player.controller = controller;
-      controller.addListener("ready", () => {
-        if (player.pendingPlay && !player.playing) player.controller.play();
-      });
       controller.addListener("playback_started", (event) => {
         const uri = event?.data?.playingURI || "";
         if (player.wanted && uri && uri !== player.wanted) return;
+        if (uri) resolveTitle(uri);
+        requestAnimationFrame(() => progressRing.classList.remove("is-resetting"));
         if (event?.data) {
           applyPlayback({
             ...event.data,

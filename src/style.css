@@ -306,7 +306,7 @@ html.js.is-ready .hero-copy {
   fill: currentColor;
 }
 
-.stage.is-live .skip {
+.stage.is-playing .skip {
   opacity: 1;
   pointer-events: auto;
   transform: scale(1);
@@ -394,6 +394,7 @@ html.js.is-ready .hero-copy {
 .disc-spin {
   position: absolute;
   inset: 0;
+  z-index: 1;
   border-radius: 50%;
   animation: platter-spin 12s linear infinite;
   animation-play-state: paused;
@@ -510,6 +511,12 @@ html.js.is-ready .hero-copy {
 .track-ring {
   z-index: 2;
   transform: rotate(-90deg);
+  opacity: 1;
+  transition: opacity 180ms var(--ease);
+}
+
+.track-ring.is-resetting {
+  opacity: 0;
 }
 
 .track-ring-bg,
@@ -758,6 +765,27 @@ html.js .panel.reveal {
   transition:
     opacity 820ms var(--enter),
     transform 820ms var(--enter);
+}
+
+.spotify-controller {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0.001;
+  pointer-events: none;
+  contain: strict;
+}
+
+.spotify-controller iframe {
+  width: 1px !important;
+  height: 1px !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  border: 0 !important;
 }
 
 .embed {
@@ -1173,6 +1201,7 @@ html.js .panel.reveal {
     transition: none;
   }
 
+  .track-ring,
   .btn,
   .track a,
   .links a,
