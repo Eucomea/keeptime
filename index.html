@@ -34,6 +34,7 @@
         <span class="nav-muted">official</span>
       </a>
       <nav class="nav-links">
+        <a href="#world">World</a>
         <a href="#listen">Listen</a>
         <a href="#connect">Connect</a>
       </nav>
@@ -54,30 +55,34 @@
               <path d="M4.2 6v12h1.8V6H4.2zm15.6 0L11 12l8.8 6V6z" />
             </svg>
           </button>
-          <div class="orbit" id="orbit" role="button" tabindex="0" aria-label="Play or pause">
-            <div class="ring ring-outer" aria-hidden="true"></div>
-            <div class="ring ring-mid" aria-hidden="true"></div>
-            <div class="ring ring-inner" aria-hidden="true"></div>
-            <div class="ticks" id="ticks" aria-hidden="true"></div>
-            <div class="wave" id="wave" aria-hidden="true"></div>
-            <svg class="track-ring" viewBox="0 0 100 100" aria-hidden="true">
-              <circle class="track-ring-bg" cx="50" cy="50" r="48.4" />
-              <circle class="track-ring-fg" id="track-progress" cx="50" cy="50" r="48.4" />
-            </svg>
-            <svg class="track-title" viewBox="0 0 100 100" aria-hidden="true">
-              <defs>
-                <path id="title-path" d="M50,50 m-43.5,0 a43.5,43.5 0 1,1 87,0 a43.5,43.5 0 1,1 -87,0" />
-              </defs>
-              <text>
-                <textPath id="title-text" href="#title-path">Welcome2hills · </textPath>
-              </text>
-            </svg>
-            <div class="orbit-core">
-              <img class="logo" src="/logo.jpg" alt="KEEP TIME" />
+          <div class="orbit-scene" id="orbit-scene">
+            <div class="orbit" id="orbit" role="button" tabindex="0" aria-label="Play or pause">
+              <div class="orbit-face">
+                <div class="ring ring-outer" aria-hidden="true"></div>
+                <div class="ring ring-mid" aria-hidden="true"></div>
+                <div class="ring ring-inner" aria-hidden="true"></div>
+                <div class="ticks" id="ticks" aria-hidden="true"></div>
+                <div class="wave" id="wave" aria-hidden="true"></div>
+                <svg class="track-ring" viewBox="0 0 100 100" aria-hidden="true">
+                  <circle class="track-ring-bg" cx="50" cy="50" r="48.4" />
+                  <circle class="track-ring-fg" id="track-progress" cx="50" cy="50" r="48.4" />
+                </svg>
+                <svg class="track-title" viewBox="0 0 100 100" aria-hidden="true">
+                  <defs>
+                    <path id="title-path" d="M50,50 m-43.5,0 a43.5,43.5 0 1,1 87,0 a43.5,43.5 0 1,1 -87,0" />
+                  </defs>
+                  <text>
+                    <textPath id="title-text" href="#title-path">KEEP TIME · </textPath>
+                  </text>
+                </svg>
+                <div class="orbit-core">
+                  <img class="logo" src="/logo.jpg" alt="KEEP TIME" />
+                </div>
+                <div class="hand hand-hour" id="hand-hour" aria-hidden="true"></div>
+                <div class="hand hand-minute" id="hand-minute" aria-hidden="true"></div>
+                <div class="hand hand-second" id="hand-second" aria-hidden="true"></div>
+              </div>
             </div>
-            <div class="hand hand-hour" id="hand-hour" aria-hidden="true"></div>
-            <div class="hand hand-minute" id="hand-minute" aria-hidden="true"></div>
-            <div class="hand hand-second" id="hand-second" aria-hidden="true"></div>
           </div>
           <button class="skip skip-next" id="skip-next" type="button" aria-label="Next track">
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -99,15 +104,33 @@
           </p>
           <div class="hero-actions">
             <a class="btn btn-ink" href="#listen">Listen</a>
-            <a class="btn btn-ghost" href="#connect">Connect</a>
           </div>
+        </div>
+      </section>
+
+      <section class="panel" id="world">
+        <header class="panel-head">
+          <p class="mono idx">01 / world</p>
+          <h2>KEEP TIME</h2>
+        </header>
+        <div class="world-grid">
+          <div>
+            <p class="mono kicker">formerly Welcome2hills</p>
+            <p class="world-copy">
+              A new name. Same memories. Different me.
+            </p>
+          </div>
+          <figure class="world-visual">
+            <img src="/logo.jpg" alt="KEEP TIME brush mark" width="640" height="640" />
+          </figure>
         </div>
       </section>
 
       <section class="panel" id="listen">
         <header class="panel-head">
-          <p class="mono idx">01 / listen</p>
-          <h2>Selected transmissions</h2>
+          <p class="mono idx">02 / listen</p>
+          <h2>On Spotify</h2>
+          <p class="panel-note mono">Play from the vinyl above — or open the catalog here.</p>
         </header>
         <div class="embed">
           <div id="embed-iframe"></div>
@@ -116,32 +139,26 @@
 
       <section class="panel" id="connect">
         <header class="panel-head">
-          <p class="mono idx">02 / connect</p>
+          <p class="mono idx">03 / connect</p>
           <h2>Find the signal.</h2>
         </header>
         <ul class="links">
           <li>
             <a href="https://open.spotify.com/artist/7xCL2844XqfWaBLZtVDAmz" target="_blank" rel="noreferrer">
               <span>Spotify</span>
-              <span class="mono">welcome2hills</span>
+              <span class="mono">KEEP TIME · ex Welcome2hills</span>
             </a>
           </li>
           <li>
             <a href="https://music.apple.com/us/artist/welcome2hills/1504272780" target="_blank" rel="noreferrer">
               <span>Apple Music</span>
-              <span class="mono">welcome2hills</span>
+              <span class="mono">KEEP TIME · ex Welcome2hills</span>
             </a>
           </li>
           <li>
-            <a href="https://www.youtube.com/results?search_query=Welcome2hills" target="_blank" rel="noreferrer">
-              <span>YouTube</span>
-              <span class="mono">welcome2hills</span>
-            </a>
-          </li>
-          <li>
-            <a href="mailto:contact@eucomea.com">
+            <a href="mailto:welcome2hills@gmail.com">
               <span>Booking / press</span>
-              <span class="mono">on request</span>
+              <span class="mono">welcome2hills@gmail.com</span>
             </a>
           </li>
         </ul>

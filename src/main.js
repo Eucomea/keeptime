@@ -1,4 +1,5 @@
 const orbit = document.getElementById("orbit");
+const orbitScene = document.getElementById("orbit-scene");
 const stage = document.getElementById("stage");
 const ticks = document.getElementById("ticks");
 const navClock = document.getElementById("nav-clock");
@@ -43,59 +44,79 @@ function renderClock(now) {
   secondHand.style.transform = `rotate(${s * 6}deg)`;
 }
 
-const tilt = { x: 0, y: 0, z: 0, tx: 0, ty: 0, tz: 0, ease: 0.08 };
+const tilt = { x: 0, y: 0, tx: 0, ty: 0, ease: 0.14 };
+const seat = { cx: 0, cy: 0, r: 1 };
+const pointer = { x: 0, y: 0, active: false };
+const scrollLock = { active: false, x: 0, y: 0, releaseTimer: 0 };
+
+function measureSeat() {
+  const el = orbitScene || orbit;
+  if (!el) return;
+  const disc = el.getBoundingClientRect();
+  seat.cx = disc.left + disc.width / 2;
+  seat.cy = disc.top + disc.height / 2;
+  seat.r = disc.width / 2;
+}
 
 function resetTilt() {
+  pointer.active = false;
   tilt.tx = 0;
   tilt.ty = 0;
-  tilt.tz = 0;
-  tilt.ease = 0.08;
+  tilt.ease = 0.1;
+  orbit?.classList.remove("is-tilting");
+}
+
+function updateTiltTarget() {
+  if (!pointer.active) {
+    tilt.tx = 0;
+    tilt.ty = 0;
+    tilt.ease = 0.1;
+    return;
+  }
+
+  const dx = pointer.x - seat.cx;
+  const dy = pointer.y - seat.cy;
+  const radius = seat.r || 1;
+  const distance = Math.hypot(dx, dy) / radius;
+  const ux = distance > 0 ? dx / (distance * radius) : 0;
+  const uy = distance > 0 ? dy / (distance * radius) : 0;
+  const amount =
+    distance <= 1
+      ? distance
+      : Math.max(0.5, 1 - (distance - 1) * 1.5);
+
+  tilt.tx = ux * 40 * amount;
+  tilt.ty = uy * -40 * amount;
+  tilt.ease = 0.12;
 }
 
 function onPointer(event) {
   if (reduced || !orbit || !stage) return;
-
-  const disc = orbit.getBoundingClientRect();
-  const dx = event.clientX - (disc.left + disc.width / 2);
-  const dy = event.clientY - (disc.top + disc.height / 2);
-  const radius = disc.width / 2;
-  const overDisc = Math.hypot(dx, dy) <= radius;
-
-  if (overDisc) {
-    const nx = Math.max(-1, Math.min(1, dx / radius));
-    const ny = Math.max(-1, Math.min(1, dy / radius));
-    tilt.tx = nx * 48;
-    tilt.ty = ny * -38;
-    tilt.tz = nx * 12;
-    tilt.ease = 0.16;
-    return;
-  }
-
-  const hero = stage.getBoundingClientRect();
-  const inHero =
-    event.clientX >= hero.left &&
-    event.clientX <= hero.right &&
-    event.clientY >= hero.top &&
-    event.clientY <= hero.bottom;
-
-  if (!inHero) {
-    resetTilt();
-    return;
-  }
-
-  const sx = (event.clientX - (hero.left + hero.width / 2)) / (hero.width / 2);
-  const sy = (event.clientY - (hero.top + hero.height / 2)) / (hero.height / 2);
-  tilt.tx = Math.max(-1, Math.min(1, sx)) * 10;
-  tilt.ty = Math.max(-1, Math.min(1, sy)) * -8;
-  tilt.tz = 0;
-  tilt.ease = 0.08;
+  pointer.x = event.clientX;
+  pointer.y = event.clientY;
+  pointer.active = true;
+  orbit.classList.add("is-tilting");
 }
 
-window.addEventListener("pointermove", onPointer);
-document.addEventListener("pointerleave", resetTilt);
+window.addEventListener("pointermove", onPointer, { passive: true });
+window.addEventListener("pointerrawupdate", onPointer, { passive: true });
+window.addEventListener("pointerout", (event) => {
+  if (!event.relatedTarget) resetTilt();
+});
+window.addEventListener("blur", resetTilt);
+measureSeat();
+window.addEventListener("resize", measureSeat);
+window.addEventListener("scroll", measureSeat, true);
 
 function frame() {
   renderClock(new Date());
+
+  if (
+    scrollLock.active &&
+    (window.scrollX !== scrollLock.x || window.scrollY !== scrollLock.y)
+  ) {
+    window.scrollTo(scrollLock.x, scrollLock.y);
+  }
 
   const elapsed = player.playing ? performance.now() - player.stamp : 0;
   const pos = Math.min(player.position + elapsed, player.duration);
@@ -113,10 +134,13 @@ function frame() {
   }
 
   if (!reduced) {
+    updateTiltTarget();
     tilt.x += (tilt.tx - tilt.x) * tilt.ease;
     tilt.y += (tilt.ty - tilt.y) * tilt.ease;
-    tilt.z += (tilt.tz - tilt.z) * tilt.ease;
-    orbit.style.transform = `rotateX(${tilt.y}deg) rotateY(${tilt.x}deg) rotateZ(${tilt.z}deg)`;
+    orbit.style.transform = `rotateX(${tilt.y}deg) rotateY(${tilt.x}deg)`;
+    if (!pointer.active && Math.hypot(tilt.x, tilt.y) < 0.15) {
+      orbit.classList.remove("is-tilting");
+    }
   }
 
   requestAnimationFrame(frame);
@@ -173,8 +197,10 @@ const player = {
   duration: 1,
   stamp: 0,
   uri: "",
+  wanted: "",
   queue: TRACKS.map((track) => track.uri),
   index: 0,
+  advancing: false,
 };
 
 function rememberTrack(uri) {
@@ -196,57 +222,110 @@ function hashWave(i, t) {
   return 0.5 + 0.5 * Math.sin(t * (1.7 + (i % 7) * 0.23) + i * 0.41);
 }
 
+const titleRing = titleText.closest(".track-title");
+let titleFade = 0;
+
 function setTitle(label) {
   const loop = `${label}  ·  `.repeat(6);
-  titleText.textContent = loop;
+  if (titleText.textContent === loop) return;
+  if (!orbit.classList.contains("is-playing") || !titleText.textContent.trim()) {
+    titleText.textContent = loop;
+    return;
+  }
+  const token = ++titleFade;
+  titleRing.classList.add("is-fading");
+  window.setTimeout(() => {
+    if (token !== titleFade) return;
+    titleText.textContent = loop;
+    titleRing.classList.remove("is-fading");
+  }, 280);
 }
 
-setTitle("Welcome2hills");
+setTitle("KEEP TIME");
 
 async function resolveTitle(uri) {
+  if (player.wanted && uri !== player.wanted) return;
   const known = titleFor(uri);
   if (known) {
     setTitle(known);
     return;
   }
-  if (!uri || !uri.includes("track:")) {
-    setTitle("Welcome2hills");
-    return;
-  }
+  if (!uri || !uri.includes("track:")) return;
   const id = uri.split(":").pop();
   try {
     const res = await fetch(`https://open.spotify.com/oembed?url=https://open.spotify.com/track/${id}`);
-    if (!res.ok) return;
+    if (!res.ok || (player.wanted && uri !== player.wanted)) return;
     const data = await res.json();
     if (data.title) setTitle(data.title.replace(/\s+[-–].*$/, "").trim());
   } catch {
-    setTitle("Welcome2hills");
+    /* keep current title */
   }
 }
 
 function applyPlayback(data) {
+  const uri = data.playingURI || "";
+  if (player.wanted && uri && uri !== player.wanted) return;
+
   player.playing = !data.isPaused && !data.isBuffering;
   player.position = Number(data.position) || 0;
   player.duration = Math.max(Number(data.duration) || 1, 1);
   player.stamp = performance.now();
-  orbit.classList.toggle("is-playing", player.playing);
+  orbit.classList.toggle("is-playing", player.playing || player.advancing);
 
-  if (data.playingURI && data.playingURI !== player.uri) {
-    player.uri = data.playingURI;
-    rememberTrack(data.playingURI);
-    resolveTitle(data.playingURI);
+  if (uri && uri !== player.uri) {
+    player.uri = uri;
+    rememberTrack(uri);
+    resolveTitle(uri);
   }
+
+  if (player.wanted && uri === player.wanted && player.playing) {
+    if (player.pendingPlay) {
+      player.pendingPlay = false;
+      releaseScroll();
+    }
+    if (player.position < player.duration - 1000) player.advancing = false;
+  }
+
+  if (player.advancing) return;
+  if (player.duration <= 2000 || player.position < player.duration - 250) return;
+  if (!data.isPaused && player.playing) return;
+  skip(1);
+}
+
+function lockScroll() {
+  window.clearTimeout(scrollLock.releaseTimer);
+  scrollLock.x = window.scrollX;
+  scrollLock.y = window.scrollY;
+  scrollLock.active = true;
+  scrollLock.releaseTimer = window.setTimeout(() => {
+    window.scrollTo(scrollLock.x, scrollLock.y);
+    scrollLock.active = false;
+    measureSeat();
+  }, 6000);
+}
+
+function releaseScroll() {
+  window.clearTimeout(scrollLock.releaseTimer);
+  scrollLock.releaseTimer = window.setTimeout(() => {
+    window.scrollTo(scrollLock.x, scrollLock.y);
+    scrollLock.active = false;
+    measureSeat();
+  }, 800);
 }
 
 function skip(step) {
   if (!player.controller || !player.queue.length) return;
+  lockScroll();
   player.index = (player.index + step + player.queue.length) % player.queue.length;
   const uri = player.queue[player.index];
+  player.wanted = uri;
   player.uri = uri;
   player.position = 0;
+  player.duration = 1;
+  player.advancing = true;
+  player.pendingPlay = true;
   player.stamp = performance.now();
   resolveTitle(uri);
-  player.pendingPlay = true;
   orbit.classList.add("is-playing");
   if (typeof player.controller.loadEntity === "function") {
     player.controller.loadEntity(uri);
@@ -265,25 +344,25 @@ function playEmbed() {
   player.queued = true;
 }
 
-function insideDisc(event) {
-  const disc = orbit.getBoundingClientRect();
-  const dx = event.clientX - (disc.left + disc.width / 2);
-  const dy = event.clientY - (disc.top + disc.height / 2);
-  return Math.hypot(dx, dy) <= disc.width / 2;
-}
-
 let press = null;
 orbit.addEventListener("pointerdown", (event) => {
-  if (!insideDisc(event)) return;
-  press = { x: event.clientX, y: event.clientY };
+  orbit.setPointerCapture(event.pointerId);
+  press = { id: event.pointerId, x: event.clientX, y: event.clientY };
 });
 
 orbit.addEventListener("pointerup", (event) => {
-  if (!press) return;
+  if (!press || press.id !== event.pointerId) return;
   const moved = Math.hypot(event.clientX - press.x, event.clientY - press.y);
+  if (orbit.hasPointerCapture(event.pointerId)) {
+    orbit.releasePointerCapture(event.pointerId);
+  }
   press = null;
-  if (moved > 12 || !insideDisc(event)) return;
+  if (moved > 12) return;
   playEmbed();
+});
+
+orbit.addEventListener("pointercancel", () => {
+  press = null;
 });
 
 skipPrev.addEventListener("click", (event) => {
@@ -318,13 +397,20 @@ window.onSpotifyIframeApiReady = (IFrameAPI) => {
     (controller) => {
       player.controller = controller;
       controller.addListener("ready", () => {
-        if (player.pendingPlay) {
-          player.pendingPlay = false;
-          controller.play();
-        }
+        if (player.pendingPlay && !player.playing) player.controller.play();
       });
       controller.addListener("playback_started", (event) => {
-        if (event?.data?.playingURI) applyPlayback({ ...event.data, isPaused: false, isBuffering: false, position: 0, duration: player.duration });
+        const uri = event?.data?.playingURI || "";
+        if (player.wanted && uri && uri !== player.wanted) return;
+        if (event?.data) {
+          applyPlayback({
+            ...event.data,
+            isPaused: false,
+            isBuffering: false,
+            position: 0,
+            duration: Number(event.data.duration) || player.duration,
+          });
+        }
       });
       controller.addListener("playback_update", (event) => {
         if (event?.data) applyPlayback(event.data);

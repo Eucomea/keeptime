@@ -218,8 +218,6 @@ button {
   place-items: center;
   align-content: center;
   gap: 18px;
-  perspective: 900px;
-  perspective-origin: 50% 46%;
 }
 
 .deck {
@@ -300,21 +298,53 @@ button {
   background: color-mix(in srgb, var(--gold) 55%, var(--ink-10));
 }
 
-.orbit {
+.orbit-scene {
   position: relative;
   z-index: 1;
   width: min(68vw, 620px);
   aspect-ratio: 1;
-  transform-style: preserve-3d;
-  will-change: transform;
+  perspective: 1100px;
+  perspective-origin: 50% 50%;
+}
+
+.orbit {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 50%;
+  background:
+    repeating-radial-gradient(
+      circle at 50% 50%,
+      transparent 0 6px,
+      rgba(27, 23, 20, 0.03) 7px
+    ),
+    var(--rose);
+  contain: paint;
+  transform-style: flat;
+  transform-origin: 50% 50%;
+  backface-visibility: hidden;
   cursor: pointer;
+}
+
+.orbit.is-tilting {
+  will-change: transform;
+}
+
+.orbit-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  transform: translateZ(0);
 }
 
 .ring {
   position: absolute;
   border-radius: 50%;
   border: 1px solid var(--ink-10);
-  transform-style: preserve-3d;
 }
 
 .ring-outer {
@@ -339,7 +369,6 @@ button {
   position: absolute;
   inset: 0;
   z-index: 2;
-  transform-style: preserve-3d;
 }
 
 .tick {
@@ -368,7 +397,7 @@ button {
 
 .wave {
   position: absolute;
-  inset: -7%;
+  inset: 0;
   z-index: 2;
   pointer-events: none;
   opacity: 0;
@@ -403,11 +432,11 @@ button {
 .track-ring,
 .track-title {
   position: absolute;
-  inset: -3%;
-  width: 106%;
-  height: 106%;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .track-ring {
@@ -443,6 +472,10 @@ button {
   opacity: 1;
 }
 
+.orbit.is-playing .track-title.is-fading {
+  opacity: 0;
+}
+
 .track-title text {
   fill: var(--ink-60);
   font-family: var(--mono);
@@ -459,7 +492,7 @@ button {
   transform-origin: 50% 100%;
   border-radius: 2px;
   pointer-events: none;
-  filter: drop-shadow(0 1px 2px rgba(27, 23, 20, 0.28));
+  filter: none;
 }
 
 .hand-hour {
@@ -498,15 +531,13 @@ button {
       rgba(27, 23, 20, 0.035) 8px
     ),
     var(--rose);
-  box-shadow:
-    inset 0 0 0 1px var(--ink-10),
-    0 30px 80px -40px rgba(27, 23, 20, 0.28);
+  box-shadow: inset 0 0 0 1px var(--ink-10);
 }
 
 .logo {
-  width: 72%;
+  width: 86%;
   height: auto;
-  max-width: 220px;
+  max-width: 264px;
   object-fit: contain;
 }
 
@@ -583,6 +614,7 @@ button {
   margin: 0 auto;
   border-top: 1px solid var(--ink-10);
   scroll-margin-top: 72px;
+  overflow-anchor: none;
 }
 
 .panel-head {
@@ -604,10 +636,34 @@ button {
   letter-spacing: -0.03em;
 }
 
+.panel-note {
+  margin: 16px auto 0;
+  max-width: 36ch;
+  color: var(--ink-40);
+  letter-spacing: 0.06em;
+  line-height: 1.6;
+}
+
+.world-visual {
+  margin: 0;
+  overflow: hidden;
+  border-radius: 0;
+  aspect-ratio: 1;
+  background: var(--rose-deep);
+}
+
+.world-visual img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .embed {
   margin: 0;
   min-height: 352px;
   overflow: hidden;
+  overflow-anchor: none;
   border-radius: 16px;
   background: var(--ink);
   box-shadow: inset 0 0 0 1px var(--ink-10);
@@ -688,11 +744,11 @@ button {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 48px;
-  align-items: start;
+  align-items: center;
 }
 
 .world-copy {
-  margin: 0;
+  margin: 12px 0 0;
   font-family: var(--serif);
   font-size: clamp(20px, 2.2vw, 26px);
   line-height: 1.45;
@@ -823,7 +879,7 @@ button {
     height: min(78vw, 520px);
   }
 
-  .orbit {
+  .orbit-scene {
     width: min(86vw, 520px);
   }
 
