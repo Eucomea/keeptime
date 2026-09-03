@@ -8,26 +8,43 @@
       name="description"
       content="KEEP TIME — official. Pop, electronic, road notes."
     />
+    <link rel="canonical" href="https://thisiskeeptime.com/" />
     <meta name="theme-color" content="#F7E7E8" />
     <meta property="og:title" content="KEEP TIME" />
     <meta property="og:description" content="The songs aren't new. I am." />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="/og.jpg" />
+    <meta property="og:url" content="https://thisiskeeptime.com/" />
+    <meta property="og:image" content="https://thisiskeeptime.com/og.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="KEEP TIME" />
     <meta name="twitter:description" content="The songs aren't new. I am." />
-    <meta name="twitter:image" content="/og.jpg" />
+    <meta name="twitter:image" content="https://thisiskeeptime.com/og.jpg" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
     <link rel="stylesheet" href="/src/style.css" />
+    <script>
+      document.documentElement.classList.add("js");
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "MusicGroup",
+        "name": "KEEP TIME",
+        "alternateName": "Welcome2hills",
+        "url": "https://thisiskeeptime.com/",
+        "image": "https://thisiskeeptime.com/og.jpg",
+        "genre": ["Pop", "Electronic"],
+        "sameAs": [
+          "https://open.spotify.com/artist/7xCL2844XqfWaBLZtVDAmz",
+          "https://music.apple.com/us/artist/welcome2hills/1504272780",
+          "https://www.instagram.com/welcome2hills_/"
+        ]
+      }
+    </script>
   </head>
   <body>
     <div class="grain" aria-hidden="true"></div>
@@ -74,15 +91,20 @@
                   <circle class="track-ring-fg" id="track-progress" cx="50" cy="50" r="48.4" />
                 </svg>
                 <svg class="track-title" viewBox="0 0 100 100" aria-hidden="true">
-                  <defs>
-                    <path id="title-path" d="M50,50 m-43.5,0 a43.5,43.5 0 1,1 87,0 a43.5,43.5 0 1,1 -87,0" />
-                  </defs>
                   <text>
-                    <textPath id="title-text" href="#title-path">KEEP TIME · </textPath>
+                    <textPath
+                      id="title-text"
+                      path="M50,50 m-43.5,0 a43.5,43.5 0 1,1 87,0 a43.5,43.5 0 1,1 -87,0"
+                    >
+                      KEEP TIME ·
+                    </textPath>
                   </text>
                 </svg>
                 <div class="orbit-core">
-                  <img class="logo" src="/logo.jpg" alt="KEEP TIME" />
+                  <picture>
+                    <source srcset="/logo.webp" type="image/webp" />
+                    <img class="logo" src="/logo.jpg" alt="KEEP TIME" width="264" height="264" />
+                  </picture>
                 </div>
                 <div class="hand hand-hour" id="hand-hour" aria-hidden="true"></div>
                 <div class="hand hand-minute" id="hand-minute" aria-hidden="true"></div>
@@ -114,7 +136,7 @@
         </div>
       </section>
 
-      <section class="panel" id="world">
+      <section class="panel reveal" id="world">
         <header class="panel-head">
           <p class="mono idx">01 / world</p>
           <h2>KEEP TIME</h2>
@@ -126,13 +148,16 @@
               A new name. Same memories. Different me.
             </p>
           </div>
-          <figure class="world-visual">
-            <img src="/logo.jpg" alt="KEEP TIME brush mark" width="640" height="640" />
+          <figure class="world-visual" id="world-visual">
+            <picture>
+              <source srcset="/logo.webp" type="image/webp" />
+              <img src="/logo.jpg" alt="KEEP TIME brush mark" width="640" height="640" loading="lazy" />
+            </picture>
           </figure>
         </div>
       </section>
 
-      <section class="panel" id="listen">
+      <section class="panel reveal" id="listen">
         <header class="panel-head">
           <p class="mono idx">02 / listen</p>
           <h2>On Spotify</h2>
@@ -143,7 +168,7 @@
         </div>
       </section>
 
-      <section class="panel" id="connect">
+      <section class="panel reveal" id="connect">
         <header class="panel-head">
           <p class="mono idx">03 / connect</p>
           <h2>Find the signal.</h2>

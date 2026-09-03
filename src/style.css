@@ -1,3 +1,12 @@
+@import "@fontsource/plus-jakarta-sans/latin-400.css";
+@import "@fontsource/plus-jakarta-sans/latin-500.css";
+@import "@fontsource/plus-jakarta-sans/latin-600.css";
+@import "@fontsource/newsreader/latin-400.css";
+@import "@fontsource/newsreader/latin-400-italic.css";
+@import "@fontsource/newsreader/latin-500.css";
+@import "@fontsource/ibm-plex-mono/latin-400.css";
+@import "@fontsource/ibm-plex-mono/latin-500.css";
+
 :root {
   --rose: #f7e7e8;
   --rose-deep: #efd4d7;
@@ -17,6 +26,7 @@
   --serif: "Newsreader", "Times New Roman", serif;
   --mono: "IBM Plex Mono", ui-monospace, monospace;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --enter: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 *,
@@ -27,11 +37,13 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
+  overflow-x: clip;
   background: var(--rose);
   color: var(--ink);
   font-family: var(--sans);
@@ -163,11 +175,13 @@ button {
   transition: transform 320ms var(--ease);
 }
 
-.nav-links a:hover {
+.nav-links a:hover,
+.nav-links a.is-active {
   color: var(--ink);
 }
 
-.nav-links a:hover::after {
+.nav-links a:hover::after,
+.nav-links a.is-active::after {
   transform: scaleX(1);
 }
 
@@ -197,6 +211,37 @@ button {
 .hero-rail {
   align-self: end;
   padding-bottom: 28px;
+}
+
+html.js:not(.is-ready) .hero-rail,
+html.js:not(.is-ready) .stage,
+html.js:not(.is-ready) .hero-copy {
+  opacity: 0;
+  transform: translateY(18px);
+}
+
+html.js .hero-rail,
+html.js .stage,
+html.js .hero-copy {
+  transition:
+    opacity 780ms var(--enter),
+    transform 780ms var(--enter);
+}
+
+html.js:not(.is-ready) .stage {
+  transform: translateY(22px) scale(0.965);
+  transition-delay: 120ms;
+}
+
+html.js .hero-copy {
+  transition-delay: 280ms;
+}
+
+html.js.is-ready .hero-rail,
+html.js.is-ready .stage,
+html.js.is-ready .hero-copy {
+  opacity: 1;
+  transform: none;
 }
 
 .kicker {
@@ -406,6 +451,11 @@ button {
 
 .orbit.is-playing .wave {
   opacity: 1;
+  animation: wave-glow 2.4s var(--ease) infinite;
+}
+
+.orbit.is-playing .ring-outer {
+  animation: ring-pulse 2.8s var(--ease) infinite;
 }
 
 .wave-bar {
@@ -650,16 +700,39 @@ button {
 .world-visual {
   margin: 0;
   overflow: hidden;
-  border-radius: 0;
   aspect-ratio: 1;
   background: var(--rose-deep);
+  box-shadow:
+    inset 0 0 0 1px var(--ink-10),
+    0 28px 60px -40px rgba(27, 23, 20, 0.35);
+  transform-style: preserve-3d;
+  perspective: 900px;
+  will-change: transform;
+  transition: transform 420ms var(--ease);
 }
 
+.world-visual picture,
 .world-visual img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.panel.reveal.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+html.js .panel.reveal:not(.is-in) {
+  opacity: 0;
+  transform: translateY(28px);
+}
+
+html.js .panel.reveal {
+  transition:
+    opacity 820ms var(--enter),
+    transform 820ms var(--enter);
 }
 
 .embed {
@@ -895,6 +968,26 @@ button {
   }
 }
 
+@keyframes wave-glow {
+  0%,
+  100% {
+    opacity: 0.72;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes ring-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--gold) 18%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--gold) 42%, transparent);
+  }
+}
+
 @media (max-width: 980px) {
   .hero {
     grid-template-columns: 1fr;
@@ -960,12 +1053,27 @@ button {
   }
 
   .ring-mid,
-  .track-title {
+  .track-title,
+  .orbit.is-playing .wave,
+  .orbit.is-playing .ring-outer {
     animation: none;
   }
 
   .wave {
     display: none;
+  }
+
+  .hero-rail,
+  .stage,
+  .hero-copy,
+  .panel.reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .world-visual {
+    transition: none;
   }
 
   .btn,

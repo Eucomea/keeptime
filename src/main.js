@@ -19,6 +19,10 @@ for (let i = 0; i < 60; i += 1) {
 
 const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+requestAnimationFrame(() => {
+  document.documentElement.classList.add("is-ready");
+});
+
 function pad(n) {
   return String(n).padStart(2, "0");
 }
@@ -148,10 +152,30 @@ function frame() {
 
 requestAnimationFrame(frame);
 
-const jump = new URLSearchParams(location.search).get("s") || location.hash.replace("#", "");
-if (jump) {
+if ("scrollRestoration" in history) {
+  history.scrollRestoration = "manual";
+}
+
+const jump =
+  new URLSearchParams(location.search).get("s") ||
+  location.hash.replace(/^#/, "");
+const sectionJump = jump && jump !== "top";
+
+function pinTop() {
+  if (sectionJump) return;
+  window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+}
+
+if (sectionJump) {
   const el = document.getElementById(jump);
   if (el) el.scrollIntoView({ behavior: "instant", block: "start" });
+} else {
+  pinTop();
+  requestAnimationFrame(pinTop);
+  window.addEventListener("load", pinTop, { once: true });
+  window.addEventListener("pageshow", pinTop);
 }
 
 const wave = document.getElementById("wave");
@@ -202,6 +226,21 @@ const player = {
   index: 0,
   advancing: false,
 };
+
+let spotifyLoading = false;
+
+function loadSpotifyApi() {
+  if (player.controller || spotifyLoading) return;
+  if (document.querySelector('script[src*="spotify.com/embed/iframe-api"]')) {
+    spotifyLoading = true;
+    return;
+  }
+  spotifyLoading = true;
+  const spotifyApi = document.createElement("script");
+  spotifyApi.src = "https://open.spotify.com/embed/iframe-api/v1";
+  spotifyApi.async = true;
+  document.body.appendChild(spotifyApi);
+}
 
 function rememberTrack(uri) {
   if (!uri || !String(uri).includes("track:")) return;
@@ -314,7 +353,11 @@ function releaseScroll() {
 }
 
 function skip(step) {
-  if (!player.controller || !player.queue.length) return;
+  loadSpotifyApi();
+  if (!player.controller || !player.queue.length) {
+    player.queued = true;
+    return;
+  }
   lockScroll();
   player.index = (player.index + step + player.queue.length) % player.queue.length;
   const uri = player.queue[player.index];
@@ -337,6 +380,7 @@ function skip(step) {
 
 function playEmbed() {
   stage.classList.add("is-live");
+  loadSpotifyApi();
   if (player.controller) {
     player.controller.togglePlay();
     return;
@@ -428,7 +472,75 @@ window.onSpotifyIframeApiReady = (IFrameAPI) => {
   );
 };
 
-const spotifyApi = document.createElement("script");
-spotifyApi.src = "https://open.spotify.com/embed/iframe-api/v1";
-spotifyApi.async = true;
-document.body.appendChild(spotifyApi);
+/* Reveal panels on scroll */
+const revealPanels = document.querySelectorAll(".panel.reveal");
+if (reduced) {
+  revealPanels.forEach((panel) => panel.classList.add("is-in"));
+} else if ("IntersectionObserver" in window) {
+  const revealIo = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-in");
+        revealIo.unobserve(entry.target);
+      });
+    },
+    { rootMargin: "0px 0px -12% 0px", threshold: 0.12 },
+  );
+  revealPanels.forEach((panel) => revealIo.observe(panel));
+} else {
+  revealPanels.forEach((panel) => panel.classList.add("is-in"));
+}
+
+/* Lazy-load Spotify when listen section nears viewport */
+const listenSection = document.getElementById("listen");
+if (listenSection && "IntersectionObserver" in window) {
+  const listenIo = new IntersectionObserver(
+    (entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      loadSpotifyApi();
+      listenIo.disconnect();
+    },
+    { rootMargin: "200px 0px" },
+  );
+  listenIo.observe(listenSection);
+}
+
+/* Nav active section */
+const navLinks = [...document.querySelectorAll(".nav-links a")];
+const sections = navLinks
+  .map((link) => document.querySelector(link.getAttribute("href")))
+  .filter(Boolean);
+
+function updateActiveNav() {
+  const y = window.scrollY + 120;
+  let current = sections[0];
+  for (const section of sections) {
+    if (section.offsetTop <= y) current = section;
+  }
+  navLinks.forEach((link) => {
+    const match = link.getAttribute("href") === `#${current?.id}`;
+    link.classList.toggle("is-active", match);
+  });
+}
+
+window.addEventListener("scroll", updateActiveNav, { passive: true });
+updateActiveNav();
+
+/* World visual tilt */
+const worldVisual = document.getElementById("world-visual");
+if (worldVisual && !reduced && window.matchMedia("(pointer: fine)").matches) {
+  worldVisual.addEventListener(
+    "pointermove",
+    (event) => {
+      const rect = worldVisual.getBoundingClientRect();
+      const px = (event.clientX - rect.left) / rect.width - 0.5;
+      const py = (event.clientY - rect.top) / rect.height - 0.5;
+      worldVisual.style.transform = `rotateY(${px * 8}deg) rotateX(${py * -6}deg) scale(1.01)`;
+    },
+    { passive: true },
+  );
+  worldVisual.addEventListener("pointerleave", () => {
+    worldVisual.style.transform = "";
+  });
+}
