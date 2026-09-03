@@ -591,6 +591,12 @@ html.js.is-ready .hero-copy {
   object-fit: contain;
 }
 
+/* Brush mark sits slightly left in the asset — optical nudge in the disc. */
+.orbit-core .logo {
+  object-position: 62% 52%;
+  transform: translate(7%, 1%);
+}
+
 .hero-copy {
   align-self: end;
   padding-bottom: 28px;
