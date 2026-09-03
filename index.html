@@ -29,6 +29,45 @@
     <link rel="stylesheet" href="/src/style.css" />
     <script>
       document.documentElement.classList.add("js");
+      if ("scrollRestoration" in history) {
+        history.scrollRestoration = "manual";
+      }
+
+      const initialSection =
+        new URLSearchParams(location.search).get("s") ||
+        location.hash.replace(/^#/, "");
+
+      if (!initialSection || initialSection === "top") {
+        let keepTop = true;
+        const stopKeepingTop = () => {
+          keepTop = false;
+        };
+        const pinInitialTop = () => {
+          if (keepTop) window.scrollTo(0, 0);
+        };
+        const scheduleInitialTop = () => {
+          pinInitialTop();
+          [50, 150, 350, 700].forEach((delay) => {
+            window.setTimeout(pinInitialTop, delay);
+          });
+        };
+
+        window.addEventListener("pageshow", scheduleInitialTop);
+        window.addEventListener("load", scheduleInitialTop, { once: true });
+        window.addEventListener("touchstart", stopKeepingTop, {
+          once: true,
+          passive: true,
+        });
+        window.addEventListener("wheel", stopKeepingTop, {
+          once: true,
+          passive: true,
+        });
+        window.addEventListener("pointerdown", stopKeepingTop, {
+          once: true,
+          passive: true,
+        });
+        scheduleInitialTop();
+      }
     </script>
     <script type="application/ld+json">
       {
