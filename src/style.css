@@ -395,12 +395,7 @@ html.js.is-ready .hero-copy {
   z-index: 1;
   border-radius: 50%;
   animation: platter-spin 12s linear infinite;
-  animation-play-state: paused;
   will-change: transform;
-}
-
-.orbit.is-playing .disc-spin {
-  animation-play-state: running;
 }
 
 .ring {

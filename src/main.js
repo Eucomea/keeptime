@@ -18,6 +18,11 @@ for (let i = 0; i < 60; i += 1) {
 }
 
 const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
+const hasDeviceOrientation = typeof window.DeviceOrientationEvent === "function";
+const needsMotionPermission =
+  hasDeviceOrientation &&
+  typeof window.DeviceOrientationEvent.requestPermission === "function";
 
 requestAnimationFrame(() => {
   document.documentElement.classList.add("is-ready");
@@ -51,6 +56,17 @@ function renderClock(now) {
 const tilt = { x: 0, y: 0, tx: 0, ty: 0, ease: 0.14 };
 const seat = { cx: 0, cy: 0, r: 1 };
 const pointer = { x: 0, y: 0, active: false };
+const motion = {
+  enabled: false,
+  pending: false,
+  calibrated: false,
+  beta0: 0,
+  gamma0: 0,
+};
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
 
 function measureSeat() {
   const el = orbitScene || orbit;
@@ -70,6 +86,7 @@ function resetTilt() {
 }
 
 function updateTiltTarget() {
+  if (motion.enabled && coarsePointer) return;
   if (!pointer.active) {
     tilt.tx = 0;
     tilt.ty = 0;
@@ -94,11 +111,56 @@ function updateTiltTarget() {
 }
 
 function onPointer(event) {
-  if (reduced || !orbit || !stage) return;
+  if (reduced || !orbit || !stage || (motion.enabled && coarsePointer)) return;
   pointer.x = event.clientX;
   pointer.y = event.clientY;
   pointer.active = true;
   orbit.classList.add("is-tilting");
+}
+
+function onOrientation(event) {
+  if (reduced || !orbit || !stage) return;
+  const beta = Number(event?.beta);
+  const gamma = Number(event?.gamma);
+  if (!Number.isFinite(beta) || !Number.isFinite(gamma)) return;
+
+  if (!motion.calibrated) {
+    motion.beta0 = beta;
+    motion.gamma0 = gamma;
+    motion.calibrated = true;
+  }
+
+  const dBeta = beta - motion.beta0;
+  const dGamma = gamma - motion.gamma0;
+  tilt.tx = clamp(dGamma * 1.4, -40, 40);
+  tilt.ty = clamp(-dBeta * 1.4, -40, 40);
+  tilt.ease = 0.12;
+  pointer.active = false;
+  orbit.classList.add("is-tilting");
+}
+
+function startMotion() {
+  if (motion.enabled || reduced || !hasDeviceOrientation) return;
+  window.addEventListener("deviceorientation", onOrientation, { passive: true });
+  motion.enabled = true;
+}
+
+async function requestMotionAccess() {
+  if (motion.enabled || motion.pending || reduced || !coarsePointer || !hasDeviceOrientation) {
+    return;
+  }
+  motion.pending = true;
+  try {
+    if (needsMotionPermission) {
+      const state = await window.DeviceOrientationEvent.requestPermission();
+      if (state !== "granted") return;
+    }
+    startMotion();
+  } catch {
+    /* user denied or unsupported browser behavior */
+  } finally {
+    motion.pending = false;
+  }
 }
 
 window.addEventListener("pointermove", onPointer, { passive: true });
@@ -107,6 +169,14 @@ window.addEventListener("pointerout", (event) => {
   if (!event.relatedTarget) resetTilt();
 });
 window.addEventListener("blur", resetTilt);
+if (coarsePointer && !needsMotionPermission) startMotion();
+window.addEventListener(
+  "pointerdown",
+  () => {
+    requestMotionAccess();
+  },
+  { passive: true },
+);
 measureSeat();
 window.addEventListener("resize", measureSeat);
 window.addEventListener("scroll", measureSeat, true);
@@ -379,6 +449,7 @@ function skip(step) {
 }
 
 function playEmbed() {
+  requestMotionAccess();
   stage.classList.add("is-live");
   loadSpotifyApi();
   if (player.controller) {
@@ -402,6 +473,7 @@ document.getElementById("hero-listen")?.addEventListener("click", () => {
 
 let press = null;
 orbit.addEventListener("pointerdown", (event) => {
+  requestMotionAccess();
   orbit.setPointerCapture(event.pointerId);
   press = { id: event.pointerId, x: event.clientX, y: event.clientY };
 });
@@ -414,6 +486,7 @@ orbit.addEventListener("pointerup", (event) => {
   }
   press = null;
   if (moved > 12) return;
+  requestMotionAccess();
   playEmbed();
 });
 
@@ -423,12 +496,14 @@ orbit.addEventListener("pointercancel", () => {
 
 skipPrev.addEventListener("click", (event) => {
   event.stopPropagation();
+  requestMotionAccess();
   stage.classList.add("is-live");
   skip(-1);
 });
 
 skipNext.addEventListener("click", (event) => {
   event.stopPropagation();
+  requestMotionAccess();
   stage.classList.add("is-live");
   skip(1);
 });
