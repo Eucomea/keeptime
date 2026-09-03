@@ -344,6 +344,10 @@ function playEmbed() {
   player.queued = true;
 }
 
+document.getElementById("hero-listen")?.addEventListener("click", () => {
+  playEmbed();
+});
+
 let press = null;
 orbit.addEventListener("pointerdown", (event) => {
   orbit.setPointerCapture(event.pointerId);

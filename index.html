@@ -12,8 +12,14 @@
     <meta property="og:title" content="KEEP TIME" />
     <meta property="og:description" content="The songs aren't new. I am." />
     <meta property="og:type" content="website" />
-    <link rel="icon" type="image/jpeg" href="/logo.jpg" />
-    <link rel="apple-touch-icon" href="/logo.jpg" />
+    <meta property="og:image" content="/og.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="KEEP TIME" />
+    <meta name="twitter:description" content="The songs aren't new. I am." />
+    <meta name="twitter:image" content="/og.jpg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -29,7 +35,7 @@
 
     <header class="nav">
       <a class="nav-brand" href="#top">
-        <img src="/logo.jpg" alt="KEEP TIME" width="40" height="40" />
+        <img src="/favicon-512.png" alt="KEEP TIME" width="40" height="40" />
         <span class="nav-slash">/</span>
         <span class="nav-muted">official</span>
       </a>
@@ -103,7 +109,7 @@
             <em>I am.</em>
           </p>
           <div class="hero-actions">
-            <a class="btn btn-ink" href="#listen">Listen</a>
+            <button class="btn btn-ink" id="hero-listen" type="button">Listen</button>
           </div>
         </div>
       </section>
@@ -156,12 +162,28 @@
             </a>
           </li>
           <li>
+            <a href="https://www.instagram.com/welcome2hills_/" target="_blank" rel="noreferrer">
+              <span>Instagram</span>
+              <span class="mono">@welcome2hills_</span>
+            </a>
+          </li>
+          <li>
             <a href="mailto:welcome2hills@gmail.com">
               <span>Booking / press</span>
               <span class="mono">welcome2hills@gmail.com</span>
             </a>
           </li>
         </ul>
+        <div class="labels">
+          <p class="mono idx">labels</p>
+          <ul class="label-list">
+            <li>Gahara Records</li>
+            <li>Multicolor Records</li>
+            <li>Beyond.</li>
+            <li>Foolkid Records</li>
+            <li>Better Not Records</li>
+          </ul>
+        </div>
       </section>
     </main>
 
