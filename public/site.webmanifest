@@ -1,0 +1,16 @@
+{
+  "name": "KEEP TIME",
+  "short_name": "KEEP TIME",
+  "description": "Official site — KEEP TIME",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F7E7E8",
+  "theme_color": "#F7E7E8",
+  "icons": [
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
