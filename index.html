@@ -35,6 +35,8 @@
         history.scrollRestoration = "manual";
       }
 
+      const systemPrefersDark = () =>
+        window.matchMedia("(prefers-color-scheme: dark)").matches;
       const storedTheme = (() => {
         try {
           return localStorage.getItem("kt-theme");
@@ -42,12 +44,12 @@
           return null;
         }
       })();
-      const theme =
-        storedTheme === "light" || storedTheme === "dark"
+      // Android / OS dark mode wins: force site dark to avoid browser inversion.
+      const theme = systemPrefersDark()
+        ? "dark"
+        : storedTheme === "light" || storedTheme === "dark"
           ? storedTheme
-          : window.matchMedia("(prefers-color-scheme: dark)").matches
-            ? "dark"
-            : "light";
+          : "light";
       document.documentElement.dataset.theme = theme;
       const themeColor = document.getElementById("theme-color");
       if (themeColor) {

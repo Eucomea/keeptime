@@ -35,6 +35,26 @@ const logoSource = document.getElementById("logo-source");
 const logoImg = document.getElementById("logo-img");
 const worldLogoSource = document.getElementById("world-logo-source");
 const worldLogoImg = document.getElementById("world-logo-img");
+const darkQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+function systemPrefersDark() {
+  return darkQuery.matches;
+}
+
+function storedTheme() {
+  try {
+    const value = localStorage.getItem(THEME_KEY);
+    return value === "light" || value === "dark" ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+function resolveTheme() {
+  // Forced Android / OS dark → always use site dark (avoids auto-inversion).
+  if (systemPrefersDark()) return "dark";
+  return storedTheme() || "light";
+}
 
 function currentTheme() {
   return document.documentElement.dataset.theme === "dark" ? "dark" : "light";
@@ -60,7 +80,7 @@ function applyTheme(theme) {
   }
 }
 
-applyTheme(currentTheme());
+applyTheme(resolveTheme());
 
 themeToggle?.addEventListener("click", () => {
   const next = currentTheme() === "dark" ? "light" : "dark";
@@ -69,8 +89,16 @@ themeToggle?.addEventListener("click", () => {
   } catch {
     /* private mode */
   }
-  applyTheme(next);
+  // OS dark mode still wins until the phone leaves dark mode.
+  applyTheme(resolveTheme());
 });
+
+const onSystemThemeChange = () => applyTheme(resolveTheme());
+if (typeof darkQuery.addEventListener === "function") {
+  darkQuery.addEventListener("change", onSystemThemeChange);
+} else if (typeof darkQuery.addListener === "function") {
+  darkQuery.addListener(onSystemThemeChange);
+}
 
 function pad(n) {
   return String(n).padStart(2, "0");
