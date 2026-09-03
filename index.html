@@ -9,8 +9,8 @@
       content="KEEP TIME — official. Pop, electronic, road notes."
     />
     <link rel="canonical" href="https://thisiskeeptime.com/" />
-    <meta name="color-scheme" content="light dark" />
-    <meta name="supported-color-schemes" content="light dark" />
+    <meta name="color-scheme" content="light" id="color-scheme" />
+    <meta name="supported-color-schemes" content="light" id="supported-color-schemes" />
     <meta name="theme-color" content="#F7E7E8" id="theme-color" />
     <meta property="og:title" content="KEEP TIME" />
     <meta property="og:description" content="The songs aren't new. I am." />
@@ -52,9 +52,27 @@
             ? "dark"
             : "light";
       document.documentElement.dataset.theme = theme;
+      document.documentElement.style.colorScheme =
+        theme === "dark" ? "dark" : "only light";
       const themeColor = document.getElementById("theme-color");
+      const colorSchemeMeta = document.getElementById("color-scheme");
+      const supportedColorSchemes = document.getElementById(
+        "supported-color-schemes",
+      );
       if (themeColor) {
         themeColor.setAttribute("content", theme === "dark" ? "#0A0A0A" : "#F7E7E8");
+      }
+      if (colorSchemeMeta) {
+        colorSchemeMeta.setAttribute(
+          "content",
+          theme === "dark" ? "dark" : "light",
+        );
+      }
+      if (supportedColorSchemes) {
+        supportedColorSchemes.setAttribute(
+          "content",
+          theme === "dark" ? "dark" : "light",
+        );
       }
       document.addEventListener("DOMContentLoaded", () => {
         if (theme !== "dark") return;

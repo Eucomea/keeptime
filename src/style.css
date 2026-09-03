@@ -8,7 +8,7 @@
 @import "@fontsource/ibm-plex-mono/latin-500.css";
 
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
   --rose: #f7e7e8;
   --rose-deep: #efd4d7;
   --creme: #fff7f2;
@@ -44,7 +44,7 @@
 }
 
 html {
-  color-scheme: light dark;
+  color-scheme: light;
   scroll-behavior: smooth;
   background: var(--rose);
 }
@@ -1276,18 +1276,18 @@ html.js .panel.reveal {
 }
 
 html[data-theme="light"] {
-  color-scheme: light only;
+  color-scheme: only light !important;
 }
 
 html[data-theme="light"],
 html[data-theme="light"] body {
-  color-scheme: light only;
-  background: #f7e7e8;
+  color-scheme: only light !important;
+  background: #f7e7e8 !important;
   color: #1b1714;
 }
 
 html[data-theme="dark"] {
-  color-scheme: dark;
+  color-scheme: only dark !important;
   --rose: #0a0a0a;
   --rose-deep: #161616;
   --creme: #121212;
@@ -1311,7 +1311,7 @@ html[data-theme="dark"] {
 
 html[data-theme="dark"],
 html[data-theme="dark"] body {
-  color-scheme: dark;
+  color-scheme: only dark !important;
   background: var(--rose);
   color: var(--ink);
 }

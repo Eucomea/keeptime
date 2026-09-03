@@ -31,6 +31,10 @@ requestAnimationFrame(() => {
 const THEME_KEY = "kt-theme";
 const themeToggle = document.getElementById("theme-toggle");
 const themeColorMeta = document.getElementById("theme-color");
+const colorSchemeMeta = document.getElementById("color-scheme");
+const supportedColorSchemesMeta = document.getElementById(
+  "supported-color-schemes",
+);
 const logoSource = document.getElementById("logo-source");
 const logoImg = document.getElementById("logo-img");
 const worldLogoSource = document.getElementById("world-logo-source");
@@ -67,9 +71,18 @@ function applyLogoTheme(theme) {
   if (worldLogoImg) worldLogoImg.src = dark ? "/logo-dark.png" : "/logo.jpg";
 }
 
+function applyColorScheme(theme) {
+  const dark = theme === "dark";
+  // Chromium / Samsung: announce a single scheme so Auto Dark won't invert us.
+  document.documentElement.style.colorScheme = dark ? "dark" : "only light";
+  colorSchemeMeta?.setAttribute("content", dark ? "dark" : "light");
+  supportedColorSchemesMeta?.setAttribute("content", dark ? "dark" : "light");
+  themeColorMeta?.setAttribute("content", dark ? "#0A0A0A" : "#F7E7E8");
+}
+
 function applyTheme(theme) {
   document.documentElement.dataset.theme = theme;
-  themeColorMeta?.setAttribute("content", theme === "dark" ? "#0A0A0A" : "#F7E7E8");
+  applyColorScheme(theme);
   applyLogoTheme(theme);
   if (themeToggle) {
     themeToggle.setAttribute(
