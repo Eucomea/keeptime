@@ -1275,6 +1275,17 @@ html.js .panel.reveal {
   }
 }
 
+html[data-theme="light"] {
+  color-scheme: light only;
+}
+
+html[data-theme="light"],
+html[data-theme="light"] body {
+  color-scheme: light only;
+  background: #f7e7e8;
+  color: #1b1714;
+}
+
 html[data-theme="dark"] {
   color-scheme: dark;
   --rose: #0a0a0a;

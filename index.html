@@ -44,12 +44,13 @@
           return null;
         }
       })();
-      // Android / OS dark mode wins: force site dark to avoid browser inversion.
-      const theme = systemPrefersDark()
-        ? "dark"
-        : storedTheme === "light" || storedTheme === "dark"
+      // Explicit user choice wins; otherwise follow the OS.
+      const theme =
+        storedTheme === "light" || storedTheme === "dark"
           ? storedTheme
-          : "light";
+          : systemPrefersDark()
+            ? "dark"
+            : "light";
       document.documentElement.dataset.theme = theme;
       const themeColor = document.getElementById("theme-color");
       if (themeColor) {

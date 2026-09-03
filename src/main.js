@@ -51,9 +51,8 @@ function storedTheme() {
 }
 
 function resolveTheme() {
-  // Forced Android / OS dark → always use site dark (avoids auto-inversion).
-  if (systemPrefersDark()) return "dark";
-  return storedTheme() || "light";
+  // Manual choice wins, including real light mode while the OS is dark.
+  return storedTheme() || (systemPrefersDark() ? "dark" : "light");
 }
 
 function currentTheme() {
@@ -89,11 +88,14 @@ themeToggle?.addEventListener("click", () => {
   } catch {
     /* private mode */
   }
-  // OS dark mode still wins until the phone leaves dark mode.
-  applyTheme(resolveTheme());
+  applyTheme(next);
 });
 
-const onSystemThemeChange = () => applyTheme(resolveTheme());
+const onSystemThemeChange = () => {
+  // Only auto-follow the OS when the user hasn't chosen manually.
+  if (storedTheme()) return;
+  applyTheme(resolveTheme());
+};
 if (typeof darkQuery.addEventListener === "function") {
   darkQuery.addEventListener("change", onSystemThemeChange);
 } else if (typeof darkQuery.addListener === "function") {
