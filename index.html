@@ -4,10 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>KEEP TIME</title>
-    <meta
-      name="description"
-      content="KEEP TIME — official. Pop, electronic, road notes."
-    />
+    <meta name="description" content="KEEP TIME — official. New single: Still Crushing On You." />
     <link rel="canonical" href="https://thisiskeeptime.com/" />
     <meta name="color-scheme" content="light" id="color-scheme" />
     <meta name="supported-color-schemes" content="light" id="supported-color-schemes" />
@@ -27,100 +24,23 @@
     <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
-    <link rel="preconnect" href="https://open.spotify.com" crossorigin />
-    <link rel="stylesheet" href="/src/style.css" />
     <script>
-      document.documentElement.classList.add("js");
-      if ("scrollRestoration" in history) {
-        history.scrollRestoration = "manual";
-      }
-
-      const systemPrefersDark = () =>
-        window.matchMedia("(prefers-color-scheme: dark)").matches;
-      const storedTheme = (() => {
-        try {
-          return localStorage.getItem("kt-theme");
-        } catch {
-          return null;
-        }
+      // Theme before paint: saved choice > time of day (night 20:00–06:00).
+      (function () {
+        var stored = null;
+        try { stored = localStorage.getItem("kt-theme"); } catch (e) {}
+        var h = new Date().getHours();
+        var theme = stored === "light" || stored === "dark" ? stored : (h >= 20 || h < 6 ? "dark" : "light");
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = theme === "dark" ? "only dark" : "only light";
+        var scheme = theme === "dark" ? "dark" : "light";
+        var tc = document.getElementById("theme-color");
+        var cs = document.getElementById("color-scheme");
+        var scs = document.getElementById("supported-color-schemes");
+        if (tc) tc.setAttribute("content", theme === "dark" ? "#0A0A0A" : "#F7E7E8");
+        if (cs) cs.setAttribute("content", scheme);
+        if (scs) scs.setAttribute("content", scheme);
       })();
-      // Explicit user choice wins; otherwise follow the OS.
-      const theme =
-        storedTheme === "light" || storedTheme === "dark"
-          ? storedTheme
-          : systemPrefersDark()
-            ? "dark"
-            : "light";
-      document.documentElement.dataset.theme = theme;
-      document.documentElement.style.colorScheme =
-        theme === "dark" ? "dark" : "only light";
-      const themeColor = document.getElementById("theme-color");
-      const colorSchemeMeta = document.getElementById("color-scheme");
-      const supportedColorSchemes = document.getElementById(
-        "supported-color-schemes",
-      );
-      if (themeColor) {
-        themeColor.setAttribute("content", theme === "dark" ? "#0A0A0A" : "#F7E7E8");
-      }
-      if (colorSchemeMeta) {
-        colorSchemeMeta.setAttribute(
-          "content",
-          theme === "dark" ? "dark" : "light",
-        );
-      }
-      if (supportedColorSchemes) {
-        supportedColorSchemes.setAttribute(
-          "content",
-          theme === "dark" ? "dark" : "light",
-        );
-      }
-      document.addEventListener("DOMContentLoaded", () => {
-        if (theme !== "dark") return;
-        const logoSource = document.getElementById("logo-source");
-        const logoImg = document.getElementById("logo-img");
-        const worldLogoSource = document.getElementById("world-logo-source");
-        const worldLogoImg = document.getElementById("world-logo-img");
-        if (logoSource) logoSource.srcset = "/logo-dark.webp";
-        if (logoImg) logoImg.src = "/logo-dark.png";
-        if (worldLogoSource) worldLogoSource.srcset = "/logo-dark.webp";
-        if (worldLogoImg) worldLogoImg.src = "/logo-dark.png";
-      });
-
-      const initialSection =
-        new URLSearchParams(location.search).get("s") ||
-        location.hash.replace(/^#/, "");
-
-      if (!initialSection || initialSection === "top") {
-        let keepTop = true;
-        const stopKeepingTop = () => {
-          keepTop = false;
-        };
-        const pinInitialTop = () => {
-          if (keepTop) window.scrollTo(0, 0);
-        };
-        const scheduleInitialTop = () => {
-          pinInitialTop();
-          [50, 150, 350, 700].forEach((delay) => {
-            window.setTimeout(pinInitialTop, delay);
-          });
-        };
-
-        window.addEventListener("pageshow", scheduleInitialTop);
-        window.addEventListener("load", scheduleInitialTop, { once: true });
-        window.addEventListener("touchstart", stopKeepingTop, {
-          once: true,
-          passive: true,
-        });
-        window.addEventListener("wheel", stopKeepingTop, {
-          once: true,
-          passive: true,
-        });
-        window.addEventListener("pointerdown", stopKeepingTop, {
-          once: true,
-          passive: true,
-        });
-        scheduleInitialTop();
-      }
     </script>
     <script type="application/ld+json">
       {
@@ -130,7 +50,7 @@
         "alternateName": "Welcome2hills",
         "url": "https://thisiskeeptime.com/",
         "image": "https://thisiskeeptime.com/og.jpg",
-        "genre": ["Pop", "Electronic"],
+        "genre": ["Pop", "R&B", "Electronic"],
         "sameAs": [
           "https://open.spotify.com/artist/7xCL2844XqfWaBLZtVDAmz",
           "https://music.apple.com/us/artist/welcome2hills/1504272780",
@@ -138,201 +58,156 @@
         ]
       }
     </script>
+    <script type="module" src="/src/main.js"></script>
   </head>
   <body>
     <div class="grain" aria-hidden="true"></div>
-    <div class="wash" aria-hidden="true"></div>
-    <div class="spotify-controller" aria-hidden="true">
-      <div id="embed-iframe"></div>
-    </div>
 
     <header class="nav">
-      <a class="nav-brand" href="#top">
-        <img src="/favicon-512.png" alt="KEEP TIME" width="40" height="40" />
-        <span class="nav-slash">/</span>
-        <span class="nav-muted">official</span>
-      </a>
+      <a class="nav-brand" href="#top"><img src="/logo-kt.png" alt="KEEP TIME" width="720" height="629" /></a>
       <nav class="nav-links">
-        <a href="#world">World</a>
-        <a href="#listen">Listen</a>
-        <a href="#connect">Connect</a>
-      </nav>
-      <div class="nav-end">
-        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to dark theme">
-          <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M15.2 3.1a8.6 8.6 0 1 0 5.7 15.2A9.2 9.2 0 0 1 15.2 3.1z" />
-          </svg>
-          <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="12" cy="12" r="3.6" />
-            <path d="M12 2.8v2.2M12 19v2.2M4.1 4.1l1.6 1.6M18.3 18.3l1.6 1.6M2.8 12h2.2M19 12h2.2M4.1 19.9l1.6-1.6M18.3 5.7l1.6-1.6" />
-          </svg>
+        <a href="#music">01 / music</a>
+        <a href="#memories">02 / memories</a>
+        <a href="#about">03 / about</a>
+        <a href="#label">04 / label</a>
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch theme">
+          <span class="dot" aria-hidden="true"></span>
+          <span id="theme-label">day</span>
+          <time class="muted" id="nav-clock">00:00:00</time>
         </button>
-        <time class="nav-clock" id="nav-clock" datetime="">00:00:00</time>
-      </div>
+      </nav>
     </header>
 
-    <main id="top">
-      <section class="hero">
-        <div class="hero-rail">
-          <p class="mono kicker">ARTIST · 2026</p>
-          <p class="mono kicker-soft">POP / ELECTRONIC / ROAD NOTES</p>
+    <main>
+      <section class="hero wrap" id="top">
+        <div class="cover">
+          <img src="/cover-kt01.jpg" alt="Still Crushing On You cover" width="3000" height="3000" />
         </div>
+        <div class="hero-copy">
+          <div class="kicker"><span class="accent">NEW SINGLE</span><span>KT · 01</span><span>RCR 001</span></div>
+          <h1>Still Crushing On You</h1>
+          <p class="lede">The songs aren’t new. <em>I am.</em></p>
+          <div class="actions">
+            <!-- TODO: pre-save / release links -->
+            <a class="btn btn-fill" href="#">Pre-save <span class="mono-sm">↗</span></a>
+            <a class="btn" href="https://open.spotify.com/artist/7xCL2844XqfWaBLZtVDAmz" target="_blank" rel="noreferrer">Spotify</a>
+            <a class="btn" href="https://music.apple.com/us/artist/welcome2hills/1504272780" target="_blank" rel="noreferrer">Apple Music</a>
+            <a class="btn" href="#">YouTube</a>
+          </div>
+          <p class="formerly">formerly Welcome2hills</p>
+        </div>
+      </section>
 
-        <div class="stage" id="stage">
-          <div class="deck">
-          <button class="skip skip-prev" id="skip-prev" type="button" aria-label="Previous track">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M4.2 6v12h1.8V6H4.2zm15.6 0L11 12l8.8 6V6z" />
-            </svg>
-          </button>
-          <div class="orbit-scene" id="orbit-scene">
-            <div class="orbit" id="orbit" role="button" tabindex="0" aria-label="Play or pause">
-              <div class="orbit-face">
-                <div class="disc-spin">
-                  <div class="ring ring-outer" aria-hidden="true"></div>
-                  <div class="ring ring-mid" aria-hidden="true"></div>
-                  <div class="ring ring-inner" aria-hidden="true"></div>
-                  <div class="ticks" id="ticks" aria-hidden="true"></div>
-                  <div class="wave" id="wave" aria-hidden="true"></div>
-                  <svg class="track-ring" viewBox="0 0 100 100" aria-hidden="true">
-                    <circle class="track-ring-bg" cx="50" cy="50" r="48.4" />
-                    <circle class="track-ring-fg" id="track-progress" cx="50" cy="50" r="48.4" />
-                  </svg>
-                  <svg class="track-title" viewBox="0 0 100 100" aria-hidden="true">
-                    <text>
-                      <textPath
-                        id="title-text"
-                        path="M50,50 m-43.5,0 a43.5,43.5 0 1,1 87,0 a43.5,43.5 0 1,1 -87,0"
-                      >
-                        KEEP TIME ·
-                      </textPath>
-                    </text>
-                  </svg>
-                  <div class="orbit-core">
-                    <picture>
-                      <source id="logo-source" srcset="/logo.webp" type="image/webp" />
-                      <img class="logo" id="logo-img" src="/logo.jpg" alt="KEEP TIME" width="264" height="264" />
-                    </picture>
-                  </div>
-                </div>
-                <div class="hand hand-hour" id="hand-hour" aria-hidden="true"></div>
-                <div class="hand hand-minute" id="hand-minute" aria-hidden="true"></div>
-                <div class="hand hand-second" id="hand-second" aria-hidden="true"></div>
+      <section class="section wrap" id="music">
+        <div class="section-head">
+          <h2>Music</h2>
+          <span class="mono muted">side a · 2026</span>
+        </div>
+        <div class="releases">
+          <a class="release" href="#top">
+            <img src="/cover-kt01-music.jpg" alt="" width="1254" height="1254" loading="lazy" />
+            <div class="release-meta"><strong>Still Crushing On You</strong><span class="mono accent">01</span></div>
+          </a>
+          <div class="release soon"><div class="slot"><span>KT · 02</span></div><div class="release-meta"><span>Hold Me Close</span><span class="mono">soon</span></div></div>
+          <div class="release soon"><div class="slot"><span>KT · 03</span></div><div class="release-meta"><span>Hold On</span><span class="mono">soon</span></div></div>
+          <div class="release soon"><div class="slot"><span>KT · 04</span></div><div class="release-meta"><span>Right Back There</span><span class="mono">soon</span></div></div>
+          <div class="release soon"><div class="slot"><span>KT · 05</span></div><div class="release-meta"><span>Slide With You</span><span class="mono">soon</span></div></div>
+        </div>
+      </section>
+
+      <section class="memories" id="memories">
+        <div class="wrap split">
+          <div class="stack">
+            <span class="mono accent">KEPT MEMORIES</span>
+            <h2>What song takes you right back there?</h2>
+            <p class="muted body">Send the song and the memory that comes with it. One is posted every week, with the year as a date stamp.</p>
+            <form class="memory-form" id="memory-form">
+              <div class="row">
+                <input name="song" required placeholder="The song" />
+                <input name="year" placeholder="Year" />
               </div>
+              <textarea name="memory" required rows="3" placeholder="Where were you?"></textarea>
+              <button class="btn btn-fill" type="submit">Send memory</button>
+            </form>
+            <p class="memory-sent muted" id="memory-sent" hidden>Your mail app opens with the memory. Send it from there.</p>
+          </div>
+          <div class="memory-cards">
+            <article class="memory-card">
+              <div class="memory-top"><span class="stamp">’98</span><span class="mono-xs">memory 001</span></div>
+              <p>“I was one and a half, dancing in my car seat every time it came on the radio. At seventeen I did the exact same thing. That’s when my parents told me it had always done that to me.”</p>
+              <span class="mono-xs">STARDUST — MUSIC SOUNDS BETTER WITH YOU</span>
+            </article>
+            <article class="memory-card">
+              <div class="memory-top"><span class="stamp">’00</span><span class="mono-xs">memory 002</span></div>
+              <p>“Home, volume all the way up, jumping everywhere with my mum.”</p>
+              <span class="mono-xs">MODJO — LADY</span>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section wrap split" id="about">
+        <h2 class="serif-xl">A new name.<br /><em>Same memories.</em></h2>
+        <div class="stack about-copy">
+          <p>KEEP TIME writes songs that sound like the ones you grew up with: the CD in the car, the chorus you still know by heart. International pop, LA R&amp;B and K-pop by day; filtered French touch after dark.</p>
+          <p class="muted">Previously released as Welcome2hills.</p>
+          <div class="socials mono">
+            <a href="https://www.instagram.com/welcome2hills_/" target="_blank" rel="noreferrer">instagram</a>
+            <a href="#">tiktok</a>
+            <a href="https://open.spotify.com/artist/7xCL2844XqfWaBLZtVDAmz" target="_blank" rel="noreferrer">spotify</a>
+            <a href="#">youtube</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="label-section" id="label">
+        <div class="wrap split label-grid">
+          <div class="label-art">
+            <div class="label-corners mono-xs"><span>RC</span><span>’26</span></div>
+            <span class="label-word">ROSE CRUSH</span>
+            <span class="label-sub">RECORDS</span>
+            <svg class="label-stamp" viewBox="0 0 200 200" aria-hidden="true">
+              <defs><path id="rc-stamp" d="M100,100 m-74,0 a74,74 0 1,1 148,0 a74,74 0 1,1 -148,0" /></defs>
+              <circle cx="100" cy="100" r="92" fill="none" stroke="#1B1714" stroke-width="3" />
+              <circle cx="100" cy="100" r="56" fill="none" stroke="#1B1714" stroke-width="1.5" />
+              <text class="stamp-ring" fill="#1B1714"><textPath href="#rc-stamp">ROSE CRUSH RECORDS · EST. 2026 · </textPath></text>
+              <text class="stamp-rc" x="100" y="116" text-anchor="middle" fill="#1B1714">RC</text>
+            </svg>
+          </div>
+          <div class="stack label-copy">
+            <div class="stack tight">
+              <span class="mono muted">04 / label</span>
+              <h2 class="serif-xl">Rose Crush <em>Records</em></h2>
+              <p class="muted body">The name on the ℗ line of every KEEP TIME release. Suit pink, a crush, and a name for the future.</p>
+            </div>
+            <div class="catalogue-card">
+              <img src="/cover-kt01.jpg" alt="" loading="lazy" />
+              <div class="catalogue-meta">
+                <strong>Still Crushing On You</strong>
+                <span class="muted">KEEP TIME · Single · 2026</span>
+                <span class="mono-xs muted">℗ 2026 Rose Crush Records</span>
+              </div>
+              <span class="mono accent">RCR 001</span>
+            </div>
+            <div class="stack tight">
+              <span class="mono muted">PREVIOUSLY RELEASED ON</span>
+              <ul class="chips">
+                <li>Gahara Records</li>
+                <li>Multicolor Records</li>
+                <li>Miami Beats</li>
+                <li>Blanco y Negro</li>
+                <li>Beyond.</li>
+                <li>Foolkid Records</li>
+              </ul>
             </div>
           </div>
-          <button class="skip skip-next" id="skip-next" type="button" aria-label="Next track">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M19.8 6v12h-1.8V6h1.8zM4.2 6l8.8 6-8.8 6V6z" />
-            </svg>
-          </button>
-          </div>
-          <p class="deck-readout" id="deck-readout">
-            <span id="time-now">0:00</span>
-            <span class="deck-line" aria-hidden="true"></span>
-            <span id="time-end">0:00</span>
-          </p>
-        </div>
-
-        <div class="hero-copy">
-          <p class="lede">
-            The songs aren’t new.<br />
-            <em>I am.</em>
-          </p>
-          <div class="hero-actions">
-            <button class="btn btn-ink" id="hero-listen" type="button">Listen</button>
-          </div>
-        </div>
-      </section>
-
-      <section class="panel reveal" id="world">
-        <header class="panel-head">
-          <p class="mono idx">01 / world</p>
-          <h2>KEEP TIME</h2>
-        </header>
-        <div class="world-grid">
-          <div>
-            <p class="mono kicker">formerly Welcome2hills</p>
-            <p class="world-copy">
-              A new name. Same memories. Different me.
-            </p>
-          </div>
-          <figure class="world-visual" id="world-visual">
-            <picture>
-              <source id="world-logo-source" srcset="/logo.webp" type="image/webp" />
-              <img id="world-logo-img" src="/logo.jpg" alt="KEEP TIME brush mark" width="640" height="640" loading="lazy" />
-            </picture>
-          </figure>
-        </div>
-      </section>
-
-      <section class="panel reveal" id="listen">
-        <header class="panel-head">
-          <p class="mono idx">02 / listen</p>
-          <h2>On Spotify</h2>
-          <p class="panel-note mono">Play from the vinyl above — or open the catalog here.</p>
-        </header>
-        <div class="embed">
-          <iframe
-            title="KEEP TIME on Spotify"
-            src="https://open.spotify.com/embed/artist/7xCL2844XqfWaBLZtVDAmz?utm_source=generator"
-            width="100%"
-            height="352"
-            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-            loading="lazy"
-          ></iframe>
-        </div>
-      </section>
-
-      <section class="panel reveal" id="connect">
-        <header class="panel-head">
-          <p class="mono idx">03 / connect</p>
-          <h2>Find the signal.</h2>
-        </header>
-        <ul class="links">
-          <li>
-            <a href="https://open.spotify.com/artist/7xCL2844XqfWaBLZtVDAmz" target="_blank" rel="noreferrer">
-              <span>Spotify</span>
-              <span class="mono">KEEP TIME · ex Welcome2hills</span>
-            </a>
-          </li>
-          <li>
-            <a href="https://music.apple.com/us/artist/welcome2hills/1504272780" target="_blank" rel="noreferrer">
-              <span>Apple Music</span>
-              <span class="mono">KEEP TIME · ex Welcome2hills</span>
-            </a>
-          </li>
-          <li>
-            <a href="https://www.instagram.com/welcome2hills_/" target="_blank" rel="noreferrer">
-              <span>Instagram</span>
-              <span class="mono">@welcome2hills_</span>
-            </a>
-          </li>
-          <li>
-            <a href="mailto:welcome2hills@gmail.com">
-              <span>Booking / press</span>
-              <span class="mono">welcome2hills@gmail.com</span>
-            </a>
-          </li>
-        </ul>
-        <div class="labels">
-          <p class="mono idx">labels</p>
-          <ul class="label-list">
-            <li>Gahara Records</li>
-            <li>Multicolor Records</li>
-            <li>Beyond.</li>
-            <li>Foolkid Records</li>
-            <li>Better Not Records</li>
-          </ul>
         </div>
       </section>
     </main>
 
-    <footer class="foot">
-      <p class="mono">KEEP TIME · © <span id="year">2026</span></p>
-      <p class="mono muted">rev 2026.09 · main</p>
+    <footer class="foot mono">
+      <span>© <span id="year">2026</span> KEEP TIME</span>
+      <span>℗ Rose Crush Records</span>
     </footer>
-
-    <script type="module" src="/src/main.js"></script>
   </body>
 </html>
